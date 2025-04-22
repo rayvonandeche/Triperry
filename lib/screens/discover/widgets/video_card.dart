@@ -1,6 +1,7 @@
 import 'package:triperry/models/video_item.dart';
 import 'package:triperry/utils/date_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class VideoCard extends StatelessWidget {
   final VideoItem video;
@@ -31,26 +32,17 @@ class VideoCard extends StatelessWidget {
             Stack(
               alignment: Alignment.center,
               children: [
-                // Thumbnail image
+                // Thumbnail image with caching
                 AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: Image.network(
-                    video.thumbnailUrl,
+                  child: CachedNetworkImage(
+                    imageUrl: video.thumbnailUrl,
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        color: Theme.of(context).colorScheme.surfaceVariant,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) => AspectRatio(
+                    placeholder: (context, url) => Container(
+                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                    errorWidget: (context, url, error) => AspectRatio(
                       aspectRatio: 16 / 9,
                       child: Container(
                         color: Colors.grey[300],

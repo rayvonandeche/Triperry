@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:triperry/models/photo_response.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ImageCarousel extends StatefulWidget {
   final List<PhotoResponse> photos;
@@ -24,12 +25,20 @@ class _ImageCarouselState extends State<ImageCarousel> {
   late final PageController _pageController;
   int _currentPage = 0;
   Timer? _autoScrollTimer;
+  // Starting page for infinite scrolling - a large number
+  static const int _initialPage = 1000;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.9);
+    _pageController = PageController(
+      viewportFraction: 0.9,
+      initialPage: _initialPage,
+    );
     _pageController.addListener(_pageListener);
+    
+    // Update current page to match initial page
+    _currentPage = _initialPage;
     
     // Initialize auto-scroll timer if enabled
     if (widget.autoScroll && widget.photos.length > 1) {
@@ -41,7 +50,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
     _autoScrollTimer?.cancel();
     _autoScrollTimer = Timer.periodic(widget.autoScrollDuration, (timer) {
       if (_pageController.hasClients) {
-        final nextPage = (_currentPage + 1) % widget.photos.length;
+        final nextPage = _currentPage + 1;
         _pageController.animateToPage(
           nextPage,
           duration: const Duration(milliseconds: 800),
@@ -83,6 +92,21 @@ class _ImageCarouselState extends State<ImageCarousel> {
     }
   }
 
+  // Get the actual photo index from infinite scrolling index
+  int _getActualIndex(int index) {
+    return index % widget.photos.length;
+  }
+  
+  // Get item count - null means unlimited items
+  int? _getItemCount() {
+    // If no photos, return 0
+    if (widget.photos.isEmpty) {
+      return 0;
+    }
+    // Return null for unlimited/infinite items
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.photos.isEmpty) {
@@ -102,8 +126,11 @@ class _ImageCarouselState extends State<ImageCarousel> {
           height: widget.height,
           child: PageView.builder(
             controller: _pageController,
-            itemCount: widget.photos.length,
+            itemCount: _getItemCount(),
             itemBuilder: (context, index) {
+              // Get the actual photo index using modulo
+              final actualIndex = _getActualIndex(index);
+              
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 300),
                 padding: EdgeInsets.symmetric(
@@ -127,23 +154,14 @@ class _ImageCarouselState extends State<ImageCarousel> {
                     child: Stack(
                       children: [
                         Positioned.fill(
-                          child: Image.network(
-                            widget.photos[index].src.large,
+                          child: CachedNetworkImage(
+                            imageUrl: widget.photos[actualIndex].src.large,
                             fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Container(
-                                color: Theme.of(context).colorScheme.surfaceVariant,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                        : null,
-                                  ),
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) => Container(
+                            placeholder: (context, url) => Container(
+                              color: Theme.of(context).colorScheme.surfaceVariant,
+                              child: const Center(child: CircularProgressIndicator()),
+                            ),
+                            errorWidget: (context, url, error) => Container(
                               height: widget.height,
                               width: double.infinity,
                               color: Colors.grey[300],
@@ -171,7 +189,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.photos[index].photographer,
+                                  widget.photos[actualIndex].photographer,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -180,7 +198,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  widget.photos[index].alt,
+                                  widget.photos[actualIndex].alt,
                                   style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 14,
@@ -202,13 +220,16 @@ class _ImageCarouselState extends State<ImageCarousel> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(widget.photos.length, (index) {
+            // Map the current infinite page to the visible page indicator
+            final currentVisibleIndex = _getActualIndex(_currentPage);
+            
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
               width: 8,
               height: 8,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentPage == index
+                color: currentVisibleIndex == index
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.primary.withOpacity(0.3),
               ),

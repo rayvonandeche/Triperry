@@ -4,6 +4,9 @@ import 'package:triperry/models/photo_response.dart';
 import 'package:triperry/models/video_item.dart';
 import 'package:triperry/screens/discover/widgets/image_carousel.dart';
 import 'package:triperry/screens/discover/widgets/video_card.dart';
+import 'package:triperry/providers/media_cache_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class DiscoverPage extends StatefulWidget {
   final double toolbarHeight;
@@ -41,20 +44,90 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   // Videos for short videos section
   List<VideoItem> _travelShorts = [];
-  final PageController _videoPageController = PageController();
+  // Starting page for infinite scrolling - a large number
+  static const int _initialVideoPage = 1000;
+  late final PageController _videoPageController;
   Timer? _autoScrollTimer;
 
   @override
   void initState() {
     super.initState();
-    _loadImages();
-    _loadVideos();
-
+    // Initialize PageController with a large initial page to allow "infinite" scrolling in both directions
+    _videoPageController = PageController(initialPage: _initialVideoPage);
+    
+    // Check cache before loading data
+    _loadCachedDataOrFetch();
+    
     // Initialize auto-scroll timer for videos
     _startVideoAutoScroll();
 
     // Add listener to track current page
     _videoPageController.addListener(_videoPageListener);
+    
+    // Set initial current page
+    _currentVideoPage = _initialVideoPage;
+  }
+  
+  /// Load data from cache or fetch from network if not available
+  void _loadCachedDataOrFetch() {
+    final mediaCache = Provider.of<MediaCacheProvider>(context, listen: false);
+    
+    // Try to load photos from cache
+    final cachedPhotos = mediaCache.getAllCachedPhotos();
+    if (cachedPhotos != null && cachedPhotos.isNotEmpty) {
+      // Photos are available in cache
+      setState(() {
+        photos = cachedPhotos;
+        _setupCategorizedPhotos();
+        isLoading = false;
+      });
+    } else {
+      // No cached photos, load from network
+      _loadImages();
+    }
+    
+    // Try to load videos from cache
+    final cachedVideos = mediaCache.getCachedVideos();
+    if (cachedVideos != null && cachedVideos.isNotEmpty) {
+      // Videos are available in cache
+      setState(() {
+        _travelShorts = cachedVideos;
+      });
+    } else {
+      // No cached videos, load from network
+      _loadVideos();
+    }
+  }
+  
+  /// Setup categorized photos from the main photo list
+  void _setupCategorizedPhotos() {
+    if (photos.isEmpty) return;
+    
+    // Organize photos by category
+    _categorizedPhotos = {
+      "Popular Destinations": photos,
+      "Exotic Beaches": photos.where((p) => 
+          p.alt.toLowerCase().contains("beach") || 
+          p.alt.toLowerCase().contains("ocean") ||
+          p.alt.toLowerCase().contains("sea") ||
+          p.photographer.toLowerCase().contains("coastal")).toList(),
+      "Mountain Getaways": photos.where((p) => 
+          p.alt.toLowerCase().contains("mountain") || 
+          p.alt.toLowerCase().contains("alps") ||
+          p.alt.toLowerCase().contains("hill") ||
+          p.alt.toLowerCase().contains("peak")).toList(),
+      "City Adventures": photos.where((p) => 
+          p.alt.toLowerCase().contains("city") || 
+          p.alt.toLowerCase().contains("urban") ||
+          p.alt.toLowerCase().contains("skyline")).toList(),
+    };
+    
+    // Ensure each category has at least one photo
+    for (final category in _categories) {
+      if (_categorizedPhotos[category] == null || _categorizedPhotos[category]!.isEmpty) {
+        _categorizedPhotos[category] = photos.take(2).toList();
+      }
+    }
   }
 
   void _videoPageListener() {
@@ -67,13 +140,18 @@ class _DiscoverPageState extends State<DiscoverPage> {
       }
     }
   }
+  
+  // Get the actual video index from infinite scrolling index
+  int _getActualVideoIndex(int index) {
+    if (_travelShorts.isEmpty) return 0;
+    return index % _travelShorts.length;
+  }
 
   void _startVideoAutoScroll() {
     _autoScrollTimer?.cancel();
     _autoScrollTimer = Timer.periodic(const Duration(seconds: 6), (timer) {
       if (_videoPageController.hasClients && _travelShorts.length > 1) {
-        final double currentPage = _videoPageController.page ?? 0;
-        final int nextPage = ((currentPage.round() + 1) % _travelShorts.length);
+        final nextPage = _currentVideoPage + 1;
         _videoPageController.animateToPage(
           nextPage,
           duration: const Duration(milliseconds: 800),
@@ -94,59 +172,65 @@ class _DiscoverPageState extends State<DiscoverPage> {
   Future<void> _loadVideos() async {
     try {
       await Future.delayed(const Duration(milliseconds: 800));
+      
+      final videos = [
+        VideoItem(
+          id: 1,
+          title: "Santorini Sunset Views",
+          description:
+              "Experience the breathtaking sunset views of Santorini, Greece",
+          url: "https://example.com/video1",
+          thumbnailUrl: "https://picsum.photos/id/135/800/450",
+          uploadedBy: "Travel Inspo",
+          duration: 45,
+          views: 156000,
+          uploadDate: DateTime.now().subtract(const Duration(days: 5)),
+          tags: ["Greece", "Santorini", "Sunset"],
+        ),
+        VideoItem(
+          id: 2,
+          title: "Bali Beach Paradise",
+          description: "Explore the pristine beaches of Bali, Indonesia",
+          url: "https://example.com/video2",
+          thumbnailUrl: "https://picsum.photos/id/143/800/450",
+          uploadedBy: "Island Explorer",
+          duration: 62,
+          views: 235000,
+          uploadDate: DateTime.now().subtract(const Duration(days: 8)),
+          tags: ["Bali", "Beach", "Indonesia"],
+        ),
+        VideoItem(
+          id: 3,
+          title: "Tokyo Street Tour",
+          description: "Walk through the vibrant streets of Tokyo at night",
+          url: "https://example.com/video3",
+          thumbnailUrl: "https://picsum.photos/id/164/800/450",
+          uploadedBy: "Urban Adventures",
+          duration: 58,
+          views: 198000,
+          uploadDate: DateTime.now().subtract(const Duration(days: 3)),
+          tags: ["Tokyo", "Japan", "City"],
+        ),
+        VideoItem(
+          id: 4,
+          title: "Swiss Alps Hiking Guide",
+          description: "Tips for hiking through the majestic Swiss Alps",
+          url: "https://example.com/video4",
+          thumbnailUrl: "https://picsum.photos/id/110/800/450",
+          uploadedBy: "Mountain Expeditions",
+          duration: 72,
+          views: 127000,
+          uploadDate: DateTime.now().subtract(const Duration(days: 12)),
+          tags: ["Switzerland", "Alps", "Hiking"],
+        ),
+      ];
+
+      // Cache the videos for future use
+      final mediaCache = Provider.of<MediaCacheProvider>(context, listen: false);
+      mediaCache.cacheVideos(videos);
 
       setState(() {
-        _travelShorts = [
-          VideoItem(
-            id: 1,
-            title: "Santorini Sunset Views",
-            description:
-                "Experience the breathtaking sunset views of Santorini, Greece",
-            url: "https://example.com/video1",
-            thumbnailUrl: "https://picsum.photos/id/135/800/450",
-            uploadedBy: "Travel Inspo",
-            duration: 45,
-            views: 156000,
-            uploadDate: DateTime.now().subtract(const Duration(days: 5)),
-            tags: ["Greece", "Santorini", "Sunset"],
-          ),
-          VideoItem(
-            id: 2,
-            title: "Bali Beach Paradise",
-            description: "Explore the pristine beaches of Bali, Indonesia",
-            url: "https://example.com/video2",
-            thumbnailUrl: "https://picsum.photos/id/143/800/450",
-            uploadedBy: "Island Explorer",
-            duration: 62,
-            views: 235000,
-            uploadDate: DateTime.now().subtract(const Duration(days: 8)),
-            tags: ["Bali", "Beach", "Indonesia"],
-          ),
-          VideoItem(
-            id: 3,
-            title: "Tokyo Street Tour",
-            description: "Walk through the vibrant streets of Tokyo at night",
-            url: "https://example.com/video3",
-            thumbnailUrl: "https://picsum.photos/id/164/800/450",
-            uploadedBy: "Urban Adventures",
-            duration: 58,
-            views: 198000,
-            uploadDate: DateTime.now().subtract(const Duration(days: 3)),
-            tags: ["Tokyo", "Japan", "City"],
-          ),
-          VideoItem(
-            id: 4,
-            title: "Swiss Alps Hiking Guide",
-            description: "Tips for hiking through the majestic Swiss Alps",
-            url: "https://example.com/video4",
-            thumbnailUrl: "https://picsum.photos/id/110/800/450",
-            uploadedBy: "Mountain Expeditions",
-            duration: 72,
-            views: 127000,
-            uploadDate: DateTime.now().subtract(const Duration(days: 12)),
-            tags: ["Switzerland", "Alps", "Hiking"],
-          ),
-        ];
+        _travelShorts = videos;
       });
     } catch (e) {
       debugPrint('Error loading videos: $e');
@@ -156,7 +240,6 @@ class _DiscoverPageState extends State<DiscoverPage> {
   Future<void> _loadImages() async {
     try {
       // Simulating loading a few sample images with different IDs
-      // Using reliable placeholder image services for stability
       await Future.delayed(const Duration(milliseconds: 800));
       final allPhotos = [
         PhotoResponse(
@@ -302,13 +385,19 @@ class _DiscoverPageState extends State<DiscoverPage> {
         ),
       ];
 
+      // Cache the photos for future use
+      final mediaCache = Provider.of<MediaCacheProvider>(context, listen: false);
+      mediaCache.cacheAllPhotos(allPhotos);
+      
       // Organize photos by category
-      _categorizedPhotos = {
-        "Popular Destinations": allPhotos,
-        "Exotic Beaches": [allPhotos[1], allPhotos[4]],
-        "Mountain Getaways": [allPhotos[0], allPhotos[3], allPhotos[5]],
-        "City Adventures": [allPhotos[2], allPhotos[6]],
-      };
+      _setupCategorizedPhotos();
+
+      // Also cache by category
+      for (final category in _categories) {
+        if (_categorizedPhotos[category] != null) {
+          mediaCache.cachePhotos(_categorizedPhotos[category]!, category);
+        }
+      }
 
       setState(() {
         photos = allPhotos;
@@ -526,8 +615,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
-                                      child: Image.network(
-                                        photo.src.medium,
+                                      child: CachedNetworkImage(
+                                        imageUrl: photo.src.medium,
                                         fit: BoxFit.cover,
                                         width:
                                             MediaQuery.of(context).size.width *
@@ -535,27 +624,18 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                         height:
                                             MediaQuery.of(context).size.width *
                                                 0.25,
-                                        loadingBuilder:
-                                            (context, child, loadingProgress) {
-                                          if (loadingProgress == null) return child;
-                                          return Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.35,
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.25,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .secondary
-                                                .withOpacity(0.1),
-                                            child: const Center(
-                                                child:
-                                                    CircularProgressIndicator()),
-                                          );
-                                        },
+                                        placeholder: (context, url) => Container(
+                                          width: MediaQuery.of(context).size.width * 0.35,
+                                          height: MediaQuery.of(context).size.width * 0.25,
+                                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                          child: const Center(child: CircularProgressIndicator()),
+                                        ),
+                                        errorWidget: (context, url, error) => Container(
+                                          width: MediaQuery.of(context).size.width * 0.35,
+                                          height: MediaQuery.of(context).size.width * 0.25,
+                                          color: Colors.grey[300],
+                                          child: const Icon(Icons.broken_image, size: 40),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 16),
@@ -753,9 +833,17 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                       Border.all(color: Colors.white, width: 2),
                                 ),
                                 child: ClipOval(
-                                  child: Image.network(
-                                    photos.last.src.medium,
+                                  child: CachedNetworkImage(
+                                    imageUrl: photos.last.src.medium,
                                     fit: BoxFit.cover,
+                                    placeholder: (context, url) => Container(
+                                      color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                      child: const Center(child: CircularProgressIndicator()),
+                                    ),
+                                    errorWidget: (context, url, error) => Container(
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.broken_image, size: 40),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -811,9 +899,13 @@ class _DiscoverPageState extends State<DiscoverPage> {
                           height: MediaQuery.of(context).size.width * 0.75,
                           child: PageView.builder(
                             controller: _videoPageController,
-                            itemCount: _travelShorts.length,
+                            // Set itemCount to null for unlimited/infinite items
+                            itemCount: null,
                             itemBuilder: (context, index) {
-                              final video = _travelShorts[index];
+                              // Get the actual video index using modulo
+                              final actualIndex = _getActualVideoIndex(index);
+                              final video = _travelShorts[actualIndex];
+                              
                               return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 4.0),
@@ -843,6 +935,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children:
                                 List.generate(_travelShorts.length, (index) {
+                              // Map the current infinite page to the visible page indicator 
+                              final currentVisibleIndex = _getActualVideoIndex(_currentVideoPage);
+                              
                               return Container(
                                 margin:
                                     const EdgeInsets.symmetric(horizontal: 4),
@@ -850,7 +945,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                 height: 8,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: index == _currentVideoPage
+                                  color: index == currentVisibleIndex
                                       ? Theme.of(context).colorScheme.primary
                                       : Theme.of(context)
                                           .colorScheme
