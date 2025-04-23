@@ -24,7 +24,7 @@ class InputField extends StatelessWidget {
   final Color? fillColor;
   
   const InputField({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
     this.hintText,
@@ -46,7 +46,7 @@ class InputField extends StatelessWidget {
     this.border,
     this.filled = true,
     this.fillColor,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

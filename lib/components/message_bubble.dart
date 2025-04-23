@@ -10,13 +10,13 @@ class MessageBubble extends StatelessWidget {
   final VoidCallback? onTap;
   
   const MessageBubble({
-    Key? key,
+    super.key,
     required this.message,
     this.type = MessageBubbleType.ai,
     this.avatar,
     this.isAnimated = false,
     this.onTap,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {
@@ -35,14 +35,14 @@ class MessageBubble extends StatelessWidget {
             ? Theme.of(context).colorScheme.onTertiaryContainer
             : Theme.of(context).colorScheme.onSecondaryContainer;
     
-    final radius = const BorderRadius.all(Radius.circular(20));
-    final userRadius = const BorderRadius.only(
+    const radius = BorderRadius.all(Radius.circular(20));
+    const userRadius = BorderRadius.only(
       topLeft: Radius.circular(20),
       topRight: Radius.circular(4),
       bottomLeft: Radius.circular(20),
       bottomRight: Radius.circular(20),
     );
-    final aiRadius = const BorderRadius.only(
+    const aiRadius = BorderRadius.only(
       topLeft: Radius.circular(4),
       topRight: Radius.circular(20),
       bottomLeft: Radius.circular(20),

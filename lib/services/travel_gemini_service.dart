@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
 import 'gemini_service.dart';
 import 'travel_data_service.dart';
 

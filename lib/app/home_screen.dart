@@ -8,6 +8,9 @@ import 'dart:math' as math;
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
+// Import the modularized app bar actions
+import 'package:triperry/features/app_bar_actions/app_bar_actions.dart';
+
 part './drawer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -106,6 +109,13 @@ class HomeScreenState extends State<HomeScreen>
             statusBarColor:
                 Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1)));
 
+    // Use the modularized app bar actions
+    final List<Widget> screenSpecificActions = getScreenSpecificActions(
+      context,
+      currentIndex: _currentIndex,
+      showAI: showAI,
+    );
+            
     final Widget customToolbar = ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 28, sigmaY: 12),
@@ -132,7 +142,7 @@ class HomeScreenState extends State<HomeScreen>
                     onPressed: _handleBack
                   ) : 
                   IconButton(
-                    icon: const Icon(Icons.align_horizontal_left_rounded), 
+                    icon: const Icon(Icons.menu), 
                     onPressed: () => _scaffoldKey.currentState?.openDrawer()
                   ),
                 Text(
@@ -142,34 +152,7 @@ class HomeScreenState extends State<HomeScreen>
                 const Spacer(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Consumer<AppProvider>(
-                      builder: (context, appProvider, child) {
-                        IconData themeIcon;
-                        
-                        if (appProvider.themeMode == ThemeMode.system) {
-                          // Show auto icon for system theme
-                          themeIcon = Icons.brightness_auto;
-                        } else if (appProvider.themeMode == ThemeMode.light) {
-                          // Show sun icon for light theme
-                          themeIcon = Icons.light_mode;
-                        } else {
-                          // Show moon icon for dark theme
-                          themeIcon = Icons.dark_mode;
-                        }
-                        
-                        return IconButton(
-                          icon: Icon(themeIcon),
-                          tooltip: 'Toggle theme (System/Light/Dark)',
-                          onPressed: appProvider.toggleTheme,
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 16),
-                    Icon(Icons.insights_outlined),
-                    const SizedBox(width: 16),
-                    if (showAI) const Icon(Icons.more_vert),
-                  ],
+                  children: screenSpecificActions,
                 ),
               ],
             ),

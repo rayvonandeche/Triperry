@@ -40,7 +40,7 @@ class QueryHandler {
   /// Returns the extracted location string or null if no location is found
   static String? extractLocation(String query) {
     final queryLower = query.toLowerCase();
-    
+
     // Common location prefixes in travel queries
     final locationPrefixes = [
       'in ',
@@ -61,7 +61,7 @@ class QueryHandler {
       'explore ',
       'visit ',
     ];
-    
+
     // Common suffixes that might follow a location
     final locationSuffixes = [
       ' in ',
@@ -78,13 +78,13 @@ class QueryHandler {
       '.',
       ',',
     ];
-    
+
     // Check for explicit location requests like "tell me about Paris"
     for (final prefix in locationPrefixes) {
       if (queryLower.contains(prefix)) {
         final startIndex = queryLower.indexOf(prefix) + prefix.length;
         int endIndex = queryLower.length;
-        
+
         // Find the end of the location by looking for a suffix
         for (final suffix in locationSuffixes) {
           final suffixIndex = queryLower.indexOf(suffix, startIndex);
@@ -92,35 +92,79 @@ class QueryHandler {
             endIndex = suffixIndex;
           }
         }
-        
+
         // Extract the location between prefix and suffix
         if (endIndex > startIndex) {
           final location = query.substring(startIndex, endIndex).trim();
           if (location.isNotEmpty && location.length > 1) {
             // Capitalize first letter of each word for better display
             return location.split(' ').map((word) {
-              return word.isNotEmpty 
-                  ? word[0].toUpperCase() + word.substring(1) 
+              return word.isNotEmpty
+                  ? word[0].toUpperCase() + word.substring(1)
                   : '';
             }).join(' ');
           }
         }
       }
     }
-    
+
     // Check for common city and country names directly in the query
     final commonLocations = [
-      'Paris', 'London', 'New York', 'Tokyo', 'Rome', 'Amsterdam',
-      'Barcelona', 'Berlin', 'Sydney', 'Dubai', 'Singapore', 'Hong Kong',
-      'Bangkok', 'Istanbul', 'Venice', 'Prague', 'Vienna', 'Madrid',
-      'Seoul', 'San Francisco', 'Los Angeles', 'Chicago', 'Toronto',
-      'Florence', 'Kyoto', 'Bali', 'Hawaii', 'Alps', 'Caribbean',
-      'France', 'Italy', 'Spain', 'Japan', 'Thailand', 'Australia',
-      'Greece', 'Egypt', 'Morocco', 'India', 'China', 'Brazil',
-      'Mexico', 'Canada', 'Germany', 'Switzerland', 'Norway', 'Sweden',
-      'Finland', 'Denmark', 'Ireland', 'Scotland', 'Wales', 'Portugal'
+      'Paris',
+      'London',
+      'New York',
+      'Tokyo',
+      'Rome',
+      'Amsterdam',
+      'Barcelona',
+      'Berlin',
+      'Sydney',
+      'Dubai',
+      'Singapore',
+      'Hong Kong',
+      'Bangkok',
+      'Istanbul',
+      'Venice',
+      'Prague',
+      'Vienna',
+      'Madrid',
+      'Seoul',
+      'San Francisco',
+      'Los Angeles',
+      'Chicago',
+      'Toronto',
+      'Florence',
+      'Kyoto',
+      'Bali',
+      'Hawaii',
+      'Alps',
+      'Caribbean',
+      'France',
+      'Italy',
+      'Spain',
+      'Japan',
+      'Thailand',
+      'Australia',
+      'Greece',
+      'Egypt',
+      'Morocco',
+      'India',
+      'China',
+      'Brazil',
+      'Mexico',
+      'Canada',
+      'Germany',
+      'Switzerland',
+      'Norway',
+      'Sweden',
+      'Finland',
+      'Denmark',
+      'Ireland',
+      'Scotland',
+      'Wales',
+      'Portugal'
     ];
-    
+
     for (final location in commonLocations) {
       final locationLower = location.toLowerCase();
       if (queryLower.contains(locationLower)) {
@@ -131,7 +175,7 @@ class QueryHandler {
         }
       }
     }
-    
+
     return null;
   }
 
@@ -142,31 +186,32 @@ class QueryHandler {
   }
 
   // Generate interactive follow-up questions based on intent
-  static List<Map<String, String>> generateFollowUpQuestions(QueryIntent intent, String? location) {
+  static List<Map<String, String>> generateFollowUpQuestions(
+      QueryIntent intent, String? location) {
     final questions = <Map<String, String>>[];
-    
+
     if (location == null) {
       questions.add({
         'text': 'Which destination are you interested in?',
         'type': 'location'
       });
     }
-    
+
     switch (intent) {
       case QueryIntent.destination:
         questions.add({
-          'text': 'What kind of travel experience are you looking for? (beach, adventure, culture, relaxation)',
+          'text':
+              'What kind of travel experience are you looking for? (beach, adventure, culture, relaxation)',
           'type': 'preference'
         });
-        questions.add({
-          'text': 'When are you planning to travel?',
-          'type': 'date'
-        });
+        questions
+            .add({'text': 'When are you planning to travel?', 'type': 'date'});
         break;
-        
+
       case QueryIntent.activity:
         questions.add({
-          'text': 'Are you interested in any specific type of activities? (outdoor, cultural, food, family-friendly)',
+          'text':
+              'Are you interested in any specific type of activities? (outdoor, cultural, food, family-friendly)',
           'type': 'category'
         });
         questions.add({
@@ -174,25 +219,24 @@ class QueryHandler {
           'type': 'duration'
         });
         break;
-        
+
       case QueryIntent.schedule:
-        questions.add({
-          'text': 'How many days will you be staying?',
-          'type': 'days'
-        });
+        questions.add(
+            {'text': 'How many days will you be staying?', 'type': 'days'});
         questions.add({
           'text': 'Do you prefer a relaxed or packed schedule?',
           'type': 'pace'
         });
         break;
-        
+
       default:
         questions.add({
-          'text': 'What specific information are you looking for about this destination?',
+          'text':
+              'What specific information are you looking for about this destination?',
           'type': 'general'
         });
     }
-    
+
     return questions;
   }
 
@@ -303,15 +347,16 @@ class QueryHandler {
     }
   }
 
-  static Future<String> enhancePrompt(String originalQuery, QueryIntent intent) async {
+  static Future<String> enhancePrompt(
+      String originalQuery, QueryIntent intent) async {
     // Extract location from query
     final location = extractLocation(originalQuery);
-    
+
     // Set as last location if found
     if (location != null) {
       setLastLocation(location);
     }
-    
+
     String basePrompt;
     switch (intent) {
       case QueryIntent.destination:
@@ -322,7 +367,7 @@ class QueryHandler {
                  - description: A short 2-3 sentence description about the destination and its unique features
                  - imageQuery: Specific photo search term (e.g. "Paris Eiffel Tower landmark")
                  - highlights: Array of 3-4 key features or reasons to visit""";
-                 
+
       case QueryIntent.activity:
         basePrompt = """Based on the query: "$originalQuery"
                  Provide a focused JSON with 3-5 most popular activities.
@@ -332,7 +377,7 @@ class QueryHandler {
                  - description: short 2-3 sentence description of what the activity entails
                  - imageQuery: Specific photo search term for the activity
                  - highlights: Array of exactly 3 key features or reasons why this activity is special""";
-                 
+
       case QueryIntent.schedule:
         basePrompt = """Based on the query: "$originalQuery"
                  Create a detailed JSON itinerary with:
@@ -362,13 +407,13 @@ class QueryHandler {
     // Augment with real data if location is available
     if (location != null) {
       try {
-        return await _travelDataService.augmentPromptWithData(basePrompt, location);
+        return await _travelDataService.augmentPromptWithData(
+            basePrompt, location);
       } catch (e) {
-        print('Error augmenting prompt: $e');
         return basePrompt;
       }
     }
-    
+
     return basePrompt;
   }
 
