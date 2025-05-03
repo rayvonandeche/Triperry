@@ -904,12 +904,25 @@ class _DiscoverPageState extends State<DiscoverPage> {
                             itemBuilder: (context, index) {
                               // Get the actual video index using modulo
                               final actualIndex = _getActualVideoIndex(index);
+                              if (actualIndex >= _travelShorts.length) {
+                                return const SizedBox.shrink();
+                              }
                               final video = _travelShorts[actualIndex];
                               
                               return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 4.0),
-                                child: VideoCard(video: video),
+                                child: VideoCard(
+                                  video: video,
+                                  onTap: () {
+                                    // Handle video tap
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/video',
+                                      arguments: video,
+                                    );
+                                  },
+                                ),
                               );
                             },
                           ),

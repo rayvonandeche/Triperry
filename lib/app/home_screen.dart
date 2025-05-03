@@ -1,12 +1,15 @@
 import 'dart:ui';
 import 'package:triperry/providers/app_provider.dart';
 import 'package:triperry/screens/ai/ai_screen.dart';
+import 'package:triperry/screens/buddies/buddies_screen.dart';
 import 'package:triperry/screens/discover/discover_screen.dart';
+import 'package:triperry/screens/profile/profile_screen.dart';
 import 'package:triperry/screens/trips/trips_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
+import 'package:triperry/theme/app_theme.dart';
 
 // Import the modularized app bar actions
 import 'package:triperry/features/app_bar_actions/app_bar_actions.dart';
@@ -17,15 +20,15 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class HomeScreenState extends State<HomeScreen>
+class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
+  int _selectedIndex = 0;
   late AnimationController _containerController;
   late List<Animation<double>> _scaleAnimations;
   late List<Animation<double>> _fadeAnimations;
-  int _currentIndex = 0;
   bool showAI = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -35,8 +38,7 @@ class HomeScreenState extends State<HomeScreen>
     _containerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
-      reverseDuration: const Duration(milliseconds: 400),
-    )..reverse();
+    );
 
     _scaleAnimations = List.generate(4, (index) {
       final double startInterval = index * 0.08;
@@ -95,28 +97,89 @@ class HomeScreenState extends State<HomeScreen>
     await _containerController.reverse();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final double toolbarHeight =
-        kToolbarHeight + MediaQuery.of(context).padding.top;
-
-    SystemChrome.setSystemUIOverlayStyle(Theme.of(context).brightness ==
-            Brightness.dark
-        ? SystemUiOverlayStyle.light.copyWith(
-            statusBarColor:
-                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1))
-        : SystemUiOverlayStyle.dark.copyWith(
-            statusBarColor:
-                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1)));
-
-    // Use the modularized app bar actions
-    final List<Widget> screenSpecificActions = getScreenSpecificActions(
-      context,
-      currentIndex: _currentIndex,
-      showAI: showAI,
+  Widget _buildDiscoverPage() {
+    return DiscoverPage(
+      toolbarHeight: MediaQuery.of(context).padding.top + kToolbarHeight,
+      scaleAnimations: _scaleAnimations,
+      fadeAnimations: _fadeAnimations,
+      containerController: _containerController,
     );
-            
-    final Widget customToolbar = ClipRRect(
+  }
+
+  Widget _buildAppBar(BuildContext context, int currentIndex, bool showAI) {
+    final double toolbarHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
+    final String title;
+    final List<Widget> actions;
+
+    if (showAI) {
+      title = 'AI Assistant';
+      actions = [
+        IconButton(
+          icon: const Icon(Icons.help_outline_rounded),
+          onPressed: () {
+            // Show help dialog
+          },
+        ),
+      ];
+    } else {
+      switch (currentIndex) {
+        case 0:
+          title = 'Discover';
+          actions = [
+            IconButton(
+              icon: const Icon(Icons.search_rounded),
+              onPressed: () {
+                // Show search
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.filter_list_rounded),
+              onPressed: () {
+                // Show filters
+              },
+            ),
+          ];
+          break;
+        case 1:
+          title = 'My Trips';
+          actions = [
+            IconButton(
+              icon: const Icon(Icons.add_rounded),
+              onPressed: () {
+                // Add new trip
+              },
+            ),
+          ];
+          break;
+        case 2:
+          title = 'Buddies';
+          actions = [
+            IconButton(
+              icon: const Icon(Icons.search_rounded),
+              onPressed: () {
+                // Search buddies
+              },
+            ),
+          ];
+          break;
+        case 3:
+          title = 'Profile';
+          actions = [
+            IconButton(
+              icon: const Icon(Icons.settings_rounded),
+              onPressed: () {
+                // Open settings
+              },
+            ),
+          ];
+          break;
+        default:
+          title = 'Triperry';
+          actions = [];
+      }
+    }
+
+    return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 28, sigmaY: 12),
         child: Container(
@@ -124,35 +187,46 @@ class HomeScreenState extends State<HomeScreen>
           padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
           alignment: Alignment.centerRight,
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [
-              Theme.of(context).scaffoldBackgroundColor.withOpacity(1),
-              Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
-            ], stops: const [
-              0.4,
-              1.0,
-            ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.darkSurface.withOpacity(0.95)
+                    : AppTheme.lightSurface.withOpacity(0.95),
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.darkSurface.withOpacity(0.8)
+                    : AppTheme.lightSurface.withOpacity(0.8),
+              ],
+              stops: const [0.4, 1.0],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               children: [
-                showAI ? 
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded), 
-                    onPressed: _handleBack
-                  ) : 
-                  IconButton(
-                    icon: const Icon(Icons.menu), 
-                    onPressed: () => _scaffoldKey.currentState?.openDrawer()
-                  ),
+                showAI
+                    ? IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                        onPressed: _handleBack,
+                      )
+                    : IconButton(
+                        icon: const Icon(Icons.menu),
+                        onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                      ),
                 Text(
-                  'Triperry',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.lightText
+                            : AppTheme.darkText,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const Spacer(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: screenSpecificActions,
+                  children: actions,
                 ),
               ],
             ),
@@ -160,6 +234,16 @@ class HomeScreenState extends State<HomeScreen>
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      Theme.of(context).brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light.copyWith(
+              statusBarColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1))
+          : SystemUiOverlayStyle.dark.copyWith(
+              statusBarColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1)));
 
     return PopScope(
       canPop: !showAI,
@@ -172,58 +256,106 @@ class HomeScreenState extends State<HomeScreen>
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
         extendBody: true,
-        body: Stack(children: [
-          AnimatedSwitcher(
-            switchInCurve: Curves.easeInOutQuad,
-            switchOutCurve: Curves.easeInOutQuint,
-            duration: const Duration(milliseconds: 400),
-            child: showAI
-                ? const AiPage() // Use AiPage from updated import
-                : _currentIndex == 0
-                    ? DiscoverPage( // Use DiscoverPage from updated import
-                        toolbarHeight: toolbarHeight,
-                        scaleAnimations: _scaleAnimations,
-                        fadeAnimations: _fadeAnimations,
-                        containerController: _containerController,
-                      )
-                    : const Trips(), // Use Trips from updated import
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: customToolbar,
-          ),
-        ]),
+        body: Stack(
+          children: [
+            AnimatedSwitcher(
+              switchInCurve: Curves.easeInOutQuad,
+              switchOutCurve: Curves.easeInOutQuint,
+              duration: const Duration(milliseconds: 400),
+              child: showAI
+                  ? const AiPage()
+                  : _selectedIndex == 0
+                      ? _buildDiscoverPage()
+                      : _selectedIndex == 1
+                          ? const Trips()
+                          : _selectedIndex == 2
+                              ? const BuddiesScreen()
+                              : const ProfileScreen(),
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _buildAppBar(context, _selectedIndex, showAI),
+            ),
+          ],
+        ),
         bottomNavigationBar: showAI
             ? null
-            : ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                  child: BottomNavigationBar(
-                      currentIndex: _currentIndex,
-                      onTap: (value) => setState(() => _currentIndex = value),
-                      backgroundColor: Theme.of(context)
-                          .scaffoldBackgroundColor
-                          .withOpacity(0.7),
-                      items: const [
-                        BottomNavigationBarItem(
-                            label: 'Discover',
-                            icon: Icon(Icons.auto_awesome_mosaic_sharp)),
-                        BottomNavigationBarItem(
-                            label: 'Trips',
-                            icon: Icon(Icons.auto_stories_rounded)),
-                      ]),
-                ),
-              ),
+            : _buildBottomNavigationBar(context, _selectedIndex),
         floatingActionButton: !showAI
             ? FloatingActionButton(
                 onPressed: _onButtonPressed,
-                child: const Icon(Icons.auto_awesome),
+                backgroundColor: AppTheme.primaryColor,
+                child: const Icon(Icons.chat_rounded),
               )
             : null,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        drawer: _buildDrawer(context: context,currentIndexx: _currentIndex, showAI: showAI, onButtonPressedd: _onButtonPressed, setState: setState),
+        drawer: _buildDrawer(
+          context: context,
+          currentIndexx: _selectedIndex,
+          showAI: showAI,
+          onButtonPressedd: _onButtonPressed,
+          setState: setState,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavigationBar(BuildContext context, int currentIndex) {
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 28, sigmaY: 12),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.darkSurface.withOpacity(0.95)
+                    : AppTheme.lightSurface.withOpacity(0.95),
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.darkSurface.withOpacity(0.8)
+                    : AppTheme.lightSurface.withOpacity(0.8),
+              ],
+              stops: const [0.4, 1.0],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: BottomNavigationBar(
+            currentIndex: currentIndex,
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            type: BottomNavigationBarType.fixed,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            selectedItemColor: AppTheme.primaryColor,
+            unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.lightText.withOpacity(0.6)
+                : AppTheme.darkText.withOpacity(0.6),
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.explore_rounded),
+                label: 'Discover',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.flight_rounded),
+                label: 'My Trips',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.group_rounded),
+                label: 'Buddies',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_rounded),
+                label: 'Profile',
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

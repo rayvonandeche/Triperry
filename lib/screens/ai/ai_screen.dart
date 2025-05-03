@@ -247,140 +247,90 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
           // Fixed top padding for status bar
           SizedBox(height: MediaQuery.of(context).padding.top),
           
-          // AI Assistant Header - fixed and always visible with its own animation
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.0, MediaQuery.of(context).padding.top + 8, 16.0, 0.0),
-            child: AssistantHeader(
-              assistantMessage: AiConversationService.getAssistantMessageForStage(
-                _currentStage,
-                _selectedInterest,
-                _selectedDestination,
-                _travelTime,
-              ),
-              slideAnimation: AiAnimations.createHeaderSlideAnimation(_headerController),
-              fadeAnimation: AiAnimations.createFadeAnimation(_headerController),
+          // AI Assistant Header with enhanced design
+          AssistantHeader(
+            assistantMessage: AiConversationService.getAssistantMessageForStage(
+              _currentStage,
+              _selectedInterest,
+              _selectedDestination,
+              _travelTime,
             ),
+            slideAnimation: AiAnimations.createHeaderSlideAnimation(_headerController),
+            fadeAnimation: AiAnimations.createFadeAnimation(_headerController),
           ),
           
-          // Main content area with blur effect
+          // Main content area with smooth transitions
           Expanded(
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: 10.0, 
-                  sigmaY: 10.0,
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface.withOpacity(0.6),
-                  ),
-                  child: Stack(
-                    children: [
-                      // Main content
-                      ListView(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.only(
-                          top: 8, // Reduced top padding since header is separate
-                          bottom: 24,
-                          left: 16,
-                          right: 16,
-                        ),
-                        children: [
-                          // Back button - only visible when not at welcome stage
-                          if (_currentStage != TravelStage.welcome)
-                            FadeTransition(
-                              opacity: _fadeController,
-                              child: SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: const Offset(0, 0.25),
-                                  end: Offset.zero,
-                                ).animate(CurvedAnimation(
-                                  parent: _slideController,
-                                  curve: Curves.easeOutCubic,
-                                )),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 16.0),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: TextButton.icon(
-                                      onPressed: _goToPreviousStage,
-                                      icon: const Icon(Icons.arrow_back),
-                                      label: const Text('Go Back'),
-                                      style: TextButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20),
-                                          side: BorderSide(
-                                            color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
-                                          ),
-                                        ),
-                                        backgroundColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.7),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          
-                          // Dynamic content based on conversation stage with staggered animations
-                          if (!_showHistory) _buildConversationStage(),
-                          
-                          // Conversation history if enabled
-                          if (_showHistory) FadeTransition(
-                            opacity: _fadeController,
-                            child: SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(0, 0.15),
-                                end: Offset.zero,
-                              ).animate(CurvedAnimation(
-                                parent: _slideController,
-                                curve: Curves.easeOutCubic,
-                              )),
-                              child: ConversationHistoryWidget(
-                                conversationHistory: _conversationHistory,
-                              ),
-                            ),
-                          ),
-                          
-                          // User's current prompt if thinking
-                          if (_isThinking) FadeTransition(
-                            opacity: _fadeController,
-                            child: SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(0, 0.15),
-                                end: Offset.zero,
-                              ).animate(CurvedAnimation(
-                                parent: _slideController,
-                                curve: Curves.easeOutCubic,
-                              )),
-                              child: ThinkingIndicator(
-                                currentPrompt: _currentPrompt,
-                              ),
-                            ),
-                          ),
-                          
-                          const SizedBox(height: 100), // Space for the input field
+            child: Stack(
+              children: [
+                // Background gradient for visual appeal
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                          Theme.of(context).scaffoldBackgroundColor,
                         ],
                       ),
-                      
-                      // History toggle button
-                      Positioned(
-                        top: 10, // Reduced from the previous value to account for new layout
-                        right: 16,
-                        child: HistoryToggleButton(
-                          showHistory: _showHistory,
-                          isVisible: _conversationHistory.isNotEmpty,
-                          onToggle: _toggleConversationHistory,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+                
+                // Main content with smooth transitions
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  child: _isThinking
+                      ? const Center(
+                          child: ThinkingIndicator(
+                            currentPrompt: '',
+                          ),
+                        )
+                      : SingleChildScrollView(
+                          controller: _scrollController,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 16),
+                                
+                                // Stage-specific content with enhanced animations
+                                FadeTransition(
+                                  opacity: _fadeController,
+                                  child: SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(0, 0.1),
+                                      end: Offset.zero,
+                                    ).animate(CurvedAnimation(
+                                      parent: _slideController,
+                                      curve: Curves.easeOutCubic,
+                                    )),
+                                    child: _buildCurrentStage(),
+                                  ),
+                                ),
+                                
+                                const SizedBox(height: 24),
+                                
+                                // Enhanced conversation history
+                                if (_showHistory)
+                                  ConversationHistoryWidget(
+                                    conversationHistory: _conversationHistory,
+                                  ),
+                                
+                                const SizedBox(height: 100), // Space for input area
+                              ],
+                            ),
+                          ),
+                        ),
+                ),
+              ],
             ),
           ),
           
-          // Floating input area at bottom
+          // Enhanced input area with suggestions
           InputArea(
             textController: _textController,
             inputHint: AiConversationService.getInputHintForStage(_currentStage),
@@ -390,111 +340,46 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
       ),
     );
   }
-  
-  Widget _buildConversationStage() {
-    // Wrap each stage in fade and slide animations
+
+  Widget _buildCurrentStage() {
     switch (_currentStage) {
       case TravelStage.welcome:
-        return FadeTransition(
-          opacity: _fadeController,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.15),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: _slideController,
-              curve: Curves.easeOutCubic,
-            )),
-            child: WelcomeStage(
-              onSelectChip: _selectChip,
-              fadeAnimation: _fadeController,
-            ),
-          ),
+        return WelcomeStage(
+          onSelectChip: _selectChip,
+          fadeAnimation: _fadeController,
         );
-        
       case TravelStage.interestSelected:
-        return FadeTransition(
-          opacity: _fadeController,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.15),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: _slideController,
-              curve: Curves.easeOutCubic,
-            )),
-            child: DestinationOptionsStage(
-              selectedInterest: _selectedInterest,
-              travelOptions: _travelOptions,
-              onSelectChip: _selectChip,
-              slideAnimation: AiAnimations.createHorizontalSlideAnimation(_slideController),
-              fadeAnimation: _fadeController,
-            ),
-          ),
+        return DestinationOptionsStage(
+          selectedInterest: _selectedInterest,
+          travelOptions: _travelOptions,
+          onSelectChip: _selectChip,
+          slideAnimation: AiAnimations.createHorizontalSlideAnimation(_slideController),
+          fadeAnimation: _fadeController,
         );
-        
       case TravelStage.destinationSelected:
-        return FadeTransition(
-          opacity: _fadeController,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.15),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: _slideController,
-              curve: Curves.easeOutCubic,
-            )),
-            child: TimeSelectionStage(
-              selectedDestination: _selectedDestination,
-              fadeAnimation: _fadeController,
-              onSelectChip: _selectChip,
-            ),
-          ),
+        return TimeSelectionStage(
+          selectedDestination: _selectedDestination,
+          fadeAnimation: _fadeController,
+          onSelectChip: _selectChip,
         );
-        
       case TravelStage.timeSelected:
-        return FadeTransition(
-          opacity: _fadeController,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.15),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: _slideController,
-              curve: Curves.easeOutCubic,
-            )),
-            child: ActivitySelectionStage(
-              selectedDestination: _selectedDestination,
-              travelTime: _travelTime,
-              selectedInterest: _selectedInterest,
-              slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
-              fadeAnimation: _fadeController,
-              onSelectChip: _selectChip,
-            ),
-          ),
+        return ActivitySelectionStage(
+          selectedDestination: _selectedDestination,
+          travelTime: _travelTime,
+          selectedInterest: _selectedInterest,
+          slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
+          fadeAnimation: _fadeController,
+          onSelectChip: _selectChip,
         );
-        
       case TravelStage.complete:
-        return FadeTransition(
-          opacity: _fadeController,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.15),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: _slideController,
-              curve: Curves.easeOutCubic,
-            )),
-            child: FinalRecommendationsStage(
-              selectedDestination: _selectedDestination,
-              travelTime: _travelTime,
-              selectedInterest: _selectedInterest,
-              slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
-              fadeAnimation: _fadeController,
-              onSelectChip: _selectChip,
-              onResetPlanning: _resetPlanning,
-            ),
-          ),
+        return FinalRecommendationsStage(
+          selectedDestination: _selectedDestination,
+          travelTime: _travelTime,
+          selectedInterest: _selectedInterest,
+          slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
+          fadeAnimation: _fadeController,
+          onSelectChip: _selectChip,
+          onResetPlanning: _resetPlanning,
         );
     }
   }

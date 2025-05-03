@@ -1,9 +1,9 @@
 import 'package:triperry/app/home_screen.dart';
 import 'package:triperry/providers/app_provider.dart';
 import 'package:triperry/providers/media_cache_provider.dart';
+import 'package:triperry/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class App extends StatelessWidget {
@@ -38,24 +38,8 @@ class App extends StatelessWidget {
           title: 'Triperry',
           debugShowCheckedModeBanner: false,
           themeMode: appProvider.themeMode,
-          theme: ThemeData.from(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color.fromARGB(255, 245, 232, 208),
-              brightness: Brightness.light,
-            ),
-          ).copyWith(
-              textTheme: GoogleFonts.ubuntuTextTheme(
-            ThemeData.light().textTheme,
-          )),
-          darkTheme: ThemeData.from(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color.fromARGB(255, 245, 232, 208),
-              brightness: Brightness.dark,
-            ),
-          ).copyWith(
-              textTheme: GoogleFonts.ubuntuTextTheme(
-            ThemeData.dark().textTheme,
-          )),
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
           home: const HomeScreen(),
         );
       }),
