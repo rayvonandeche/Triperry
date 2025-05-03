@@ -76,11 +76,11 @@ class ProfileScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Theme.of(context).shadowColor.withOpacity(0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -125,16 +125,16 @@ class ProfileScreen extends StatelessWidget {
                       Text(
                         'Travel Enthusiast',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[600],
+                              color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
                             ),
                       ),
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildStatItem('Trips', '12'),
-                          _buildStatItem('Buddies', '24'),
-                          _buildStatItem('Countries', '8'),
+                          _buildStatItem(context, 'Trips', '12'),
+                          _buildStatItem(context, 'Buddies', '24'),
+                          _buildStatItem(context, 'Countries', '8'),
                         ],
                       ),
                     ],
@@ -154,7 +154,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                 ),
                 const SizedBox(height: 16),
-                _buildSettingsList(),
+                _buildSettingsList(context),
 
                 const SizedBox(height: 24),
 
@@ -175,7 +175,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
+  Widget _buildStatItem(BuildContext context, String label, String value) {
     return Column(
       children: [
         Text(
@@ -191,21 +191,21 @@ class ProfileScreen extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey[600],
+            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSettingsList() {
+  Widget _buildSettingsList(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -260,11 +260,11 @@ class ProfileScreen extends StatelessWidget {
     
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -303,7 +303,7 @@ class ProfileScreen extends StatelessWidget {
             title: Text(demoVideos[index + 2].title),
             subtitle: Text(
               ['2 weeks ago', '1 month ago', '2 months ago'][index],
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)),
             ),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {},

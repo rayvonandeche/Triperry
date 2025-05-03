@@ -6,6 +6,7 @@ import 'models/ai_models.dart';
 import 'services/ai_conversation_service.dart';
 import 'widgets/activity_selection_stage.dart';
 import 'widgets/assistant_header.dart';
+import 'widgets/budget_selection_stage.dart';
 import 'widgets/conversation_history.dart';
 import 'widgets/destination_options.dart';
 import 'widgets/final_recommendations_stage.dart';
@@ -14,6 +15,7 @@ import 'widgets/input_area.dart';
 import 'widgets/thinking_indicator.dart';
 import 'widgets/time_selection_stage.dart';
 import 'widgets/welcome_stage.dart';
+import 'widgets/quick_trip_form.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({Key? key}) : super(key: key);
@@ -40,10 +42,14 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   String _travelTime = "";
   List<String> _recommendations = [];
   List<TravelOption> _travelOptions = [];
+  BudgetRange? _selectedBudget;
   
   // Conversation history
   List<ConversationMessage> _conversationHistory = [];
   bool _showHistory = false;
+
+  // Add new state variables for quick form data
+  Map<String, dynamic>? _quickFormData;
 
   @override
   void initState() {
@@ -55,12 +61,12 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
     )..forward();
     
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 600), // Increased from 400ms
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     )..forward();
     
     _slideController = AnimationController(
-      duration: const Duration(milliseconds: 800), // Increased from 600ms
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     )..forward();
   }
@@ -126,6 +132,17 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
             _currentStage = AiConversationService.processActivityPreferences(userInput);
             break;
             
+          case TravelStage.activitySelected:
+            _currentStage = AiConversationService.processBudgetSelection(
+              userInput,
+              (budget) => _selectedBudget = budget,
+            );
+            break;
+            
+          case TravelStage.budgetSelected:
+            _currentStage = TravelStage.complete;
+            break;
+            
           case TravelStage.complete:
             // Check if user wants to start over
             if (userInput.contains('start') && (userInput.contains('new') || userInput.contains('over'))) {
@@ -149,13 +166,15 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
     });
   }
   
-  void _addToConversationHistory(bool isUser, String message) {
+  void _addToConversationHistory(bool isUser, String message, {MessageType type = MessageType.text, Map<String, dynamic>? metadata}) {
     setState(() {
       _conversationHistory.add(
         ConversationMessage(
           isUser: isUser,
           text: message,
           timestamp: DateTime.now(),
+          type: type,
+          metadata: metadata,
         ),
       );
     });
@@ -176,6 +195,12 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
     setState(() {
       switch (_currentStage) {
         case TravelStage.complete:
+          _currentStage = TravelStage.budgetSelected;
+          break;
+        case TravelStage.budgetSelected:
+          _currentStage = TravelStage.activitySelected;
+          break;
+        case TravelStage.activitySelected:
           _currentStage = TravelStage.timeSelected;
           break;
         case TravelStage.timeSelected:
@@ -215,6 +240,8 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
       _travelTime = "";
       _recommendations = [];
       _travelOptions = [];
+      _selectedBudget = null;
+      _quickFormData = null;
       
       // Reset animations
       _fadeController.reset();
@@ -238,6 +265,51 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
     }
   }
 
+  void _handleQuickFormComplete(Map<String, dynamic> formData) {
+    setState(() {
+      _quickFormData = formData;
+      _selectedDestination = formData['destination'];
+      _selectedBudget = BudgetRange(
+        label: _getBudgetRangeLabel(formData['budget']),
+        min: formData['budget'] * 0.8,
+        max: formData['budget'] * 1.2,
+        currency: 'USD',
+      );
+      
+      // Set interest based on trip type
+      switch (formData['tripType']) {
+        case 'leisure':
+          _selectedInterest = 'beach';
+          _travelOptions = beachDestinations;
+          break;
+        case 'business':
+          _selectedInterest = 'city';
+          _travelOptions = cityDestinations;
+          break;
+        case 'adventure':
+          _selectedInterest = 'adventure';
+          _travelOptions = mountainDestinations;
+          break;
+        case 'family':
+          _selectedInterest = 'family';
+          _travelOptions = popularDestinations;
+          break;
+        default:
+          _selectedInterest = 'general';
+          _travelOptions = popularDestinations;
+      }
+      
+      // Skip to activity selection since we have all other info
+      _currentStage = TravelStage.activitySelected;
+    });
+  }
+
+  String _getBudgetRangeLabel(double budget) {
+    if (budget < 1000) return 'Budget';
+    if (budget < 3000) return 'Mid-range';
+    return 'Luxury';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -248,15 +320,18 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
           SizedBox(height: MediaQuery.of(context).padding.top + AppBar().preferredSize.height),
           
           // AI Assistant Header with enhanced design
-          AssistantHeader(
-            assistantMessage: AiConversationService.getAssistantMessageForStage(
-              _currentStage,
-              _selectedInterest,
-              _selectedDestination,
-              _travelTime,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: AssistantHeader(
+              assistantMessage: AiConversationService.getAssistantMessageForStage(
+                _currentStage,
+                _selectedInterest,
+                _selectedDestination,
+                _travelTime,
+              ),
+              slideAnimation: AiAnimations.createHeaderSlideAnimation(_headerController),
+              fadeAnimation: AiAnimations.createFadeAnimation(_headerController),
             ),
-            slideAnimation: AiAnimations.createHeaderSlideAnimation(_headerController),
-            fadeAnimation: AiAnimations.createFadeAnimation(_headerController),
           ),
           
           // Main content area with smooth transitions
@@ -291,7 +366,7 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
                       : SingleChildScrollView(
                           controller: _scrollController,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -342,6 +417,14 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   }
 
   Widget _buildCurrentStage() {
+    if (_quickFormData == null) {
+      return QuickTripForm(
+        onFormComplete: _handleQuickFormComplete,
+        fadeAnimation: _fadeController,
+        slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
+      );
+    }
+
     switch (_currentStage) {
       case TravelStage.welcome:
         return WelcomeStage(
@@ -371,16 +454,49 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
           fadeAnimation: _fadeController,
           onSelectChip: _selectChip,
         );
+      case TravelStage.activitySelected:
+        return ActivitySelectionStage(
+          selectedDestination: _selectedDestination,
+          travelTime: _getSeasonFromDates(_quickFormData!['startDate']),
+          selectedInterest: _selectedInterest,
+          slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
+          fadeAnimation: _fadeController,
+          onSelectChip: (activity) {
+            setState(() {
+              _currentStage = TravelStage.complete;
+            });
+          },
+        );
+      case TravelStage.budgetSelected:
+        return FinalRecommendationsStage(
+          selectedDestination: _selectedDestination,
+          travelTime: _getSeasonFromDates(_quickFormData!['startDate']),
+          selectedInterest: _selectedInterest,
+          selectedBudget: _selectedBudget,
+          slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
+          fadeAnimation: _fadeController,
+          onSelectChip: _selectChip,
+          onResetPlanning: _resetPlanning,
+        );
       case TravelStage.complete:
         return FinalRecommendationsStage(
           selectedDestination: _selectedDestination,
-          travelTime: _travelTime,
+          travelTime: _getSeasonFromDates(_quickFormData!['startDate']),
           selectedInterest: _selectedInterest,
+          selectedBudget: _selectedBudget,
           slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
           fadeAnimation: _fadeController,
           onSelectChip: _selectChip,
           onResetPlanning: _resetPlanning,
         );
     }
+  }
+
+  String _getSeasonFromDates(DateTime date) {
+    final month = date.month;
+    if (month >= 3 && month <= 5) return 'spring';
+    if (month >= 6 && month <= 8) return 'summer';
+    if (month >= 9 && month <= 11) return 'fall';
+    return 'winter';
   }
 }

@@ -63,172 +63,87 @@ class AiConversationService {
   /// Process user input for activity preferences
   static TravelStage processActivityPreferences(String input) {
     // In a real app, this would generate personalized recommendations
-    return TravelStage.complete;
+    return TravelStage.activitySelected;
   }
 
-  /// Generate a response for follow-up questions after planning is complete
-  static String handleFollowUpQuestion(String input, String selectedDestination, String travelTime) {
-    if (input.contains('restaurant') || input.contains('food') || input.contains('eat')) {
-      return "I'd recommend these restaurants in $selectedDestination:\n"
-          "• ${getRandomRestaurant()}\n"
-          "• ${getRandomRestaurant()}\n"
-          "• ${getRandomRestaurant()}";
-    } else if (input.contains('hotel') || input.contains('stay') || input.contains('accommodation')) {
-      return "Here are some accommodation options in $selectedDestination:\n"
-          "• ${getRandomHotel()} - \$\$\n"
-          "• ${getRandomHotel()} - \$\$\$\n"
-          "• ${getRandomHotel()} - \$\$\$\$";
-    } else if (input.contains('modify') || input.contains('change') || input.contains('different')) {
-      return "Sure, we can modify your travel plan. What would you like to change? The destination, travel time, or activities?";
+  /// Process user input for budget selection
+  static TravelStage processBudgetSelection(String input, void Function(BudgetRange) setBudgetRange) {
+    if (input.contains('budget') || input.contains('cheap') || input.contains('affordable')) {
+      setBudgetRange(budgetRanges[0]);
+    } else if (input.contains('mid') || input.contains('moderate') || input.contains('average')) {
+      setBudgetRange(budgetRanges[1]);
+    } else if (input.contains('luxury') || input.contains('premium') || input.contains('high')) {
+      setBudgetRange(budgetRanges[2]);
     } else {
-      return "I'm happy to help with your $travelTime trip to $selectedDestination! Is there anything specific you'd like to know about the itinerary or destination?";
+      setBudgetRange(budgetRanges[1]); // Default to mid-range
     }
-  }
-
-  /// Get a random restaurant name
-  static String getRandomRestaurant() {
-    final restaurants = [
-      "Local Flavor Bistro",
-      "Ocean View Restaurant",
-      "Mountain Peak Cafe",
-      "Urban Table & Bar",
-      "Traditional Tastes",
-      "Sunset Grill",
-      "The Hungry Traveler"
-    ];
-    restaurants.shuffle();
-    return restaurants.first;
-  }
-
-  /// Get a random hotel name
-  static String getRandomHotel() {
-    final hotels = [
-      "Traveler's Rest Inn",
-      "Grand Plaza Hotel",
-      "Seaside Resort & Spa",
-      "Mountain View Lodge",
-      "City Center Suites",
-      "Heritage Boutique Hotel",
-      "Panorama Luxury Resort"
-    ];
-    hotels.shuffle();
-    return hotels.first;
+    
+    return TravelStage.complete;
   }
 
   /// Generate a sample itinerary based on selected interest
   static List<ItineraryDay> generateSampleItinerary(String selectedInterest) {
-    if (selectedInterest == 'beach') {
-      return [
-        const ItineraryDay(
-          title: "Day 1: Arrival & Beach Relaxation",
-          activities: [
-            "Morning: Arrive and check in to your accommodation",
-            "Afternoon: Visit the main beach and relax",
-            "Evening: Sunset dinner at a beachside restaurant"
-          ],
-        ),
-        const ItineraryDay(
-          title: "Day 2: Ocean Adventures",
-          activities: [
-            "Morning: Snorkeling tour to nearby coral reefs",
-            "Afternoon: Beach activities or water sports",
-            "Evening: Seafood dinner and local entertainment"
-          ],
-        ),
-        const ItineraryDay(
-          title: "Day 3: Coastal Exploration",
-          activities: [
-            "Morning: Hike along coastal trails",
-            "Afternoon: Visit to local markets and shops",
-            "Evening: Beach bonfire or night swimming"
-          ],
-        ),
-      ];
-    } else if (selectedInterest == 'mountain') {
-      return [
-        const ItineraryDay(
-          title: "Day 1: Arrival & Orientation",
-          activities: [
-            "Morning: Arrive and check in to your accommodation",
-            "Afternoon: Short introductory hike to a viewpoint",
-            "Evening: Dinner at a local mountain lodge"
-          ],
-        ),
-        const ItineraryDay(
-          title: "Day 2: Full Day Trek",
-          activities: [
-            "Morning: Begin trek to popular mountain trail",
-            "Afternoon: Picnic lunch at a scenic spot",
-            "Evening: Relax with hot cocoa and mountain views"
-          ],
-        ),
-        const ItineraryDay(
-          title: "Day 3: Nature & Wildlife",
-          activities: [
-            "Morning: Guided nature walk with local expert",
-            "Afternoon: Visit to wildlife sanctuary or natural landmark",
-            "Evening: Traditional dinner with local specialties"
-          ],
-        ),
-      ];
-    } else {
-      return [
-        const ItineraryDay(
-          title: "Day 1: Arrival & City Introduction",
-          activities: [
-            "Morning: Arrive and check in to your accommodation",
-            "Afternoon: Walking tour of main city attractions",
-            "Evening: Dinner at a popular local restaurant"
-          ],
-        ),
-        const ItineraryDay(
-          title: "Day 2: Cultural Exploration",
-          activities: [
-            "Morning: Visit to major museums or galleries",
-            "Afternoon: Shopping and local markets",
-            "Evening: Cultural performance or night tour"
-          ],
-        ),
-        const ItineraryDay(
-          title: "Day 3: Local Experiences",
-          activities: [
-            "Morning: Food tour or cooking class",
-            "Afternoon: Visit to historical sites",
-            "Evening: Dinner at a well-known restaurant"
-          ],
-        ),
-      ];
-    }
-  }
-
-  /// Get an image URL for the trip based on the selected interest
-  static String getTripImageUrl(String selectedInterest) {
-    // Return a relevant image URL based on destination and interest
-    if (selectedInterest == 'beach') {
-      return 'https://picsum.photos/id/128/600/400';
-    } else if (selectedInterest == 'mountain') {
-      return 'https://picsum.photos/id/29/600/400';
-    } else if (selectedInterest == 'city') {
-      return 'https://picsum.photos/id/42/600/400';
-    } else {
-      return 'https://picsum.photos/id/20/600/400';
-    }
-  }
-
-  /// Get appropriate message for the assistant based on the current stage
-  static String getAssistantMessageForStage(
-      TravelStage stage, String selectedInterest, String selectedDestination, String travelTime) {
-    switch (stage) {
-      case TravelStage.welcome:
-        return "Hi! I'm your travel assistant. What kind of trip are you looking for?";
-      case TravelStage.interestSelected:
-        return "Great choice! Here are some ${selectedInterest.isNotEmpty ? selectedInterest : 'popular'} destinations. Which one interests you?";
-      case TravelStage.destinationSelected:
-        return "Wonderful! $selectedDestination is an amazing choice. When are you thinking of traveling?";
-      case TravelStage.timeSelected:
-        return "Perfect! What kind of activities are you interested in for your $travelTime trip to $selectedDestination?";
-      case TravelStage.complete:
-        return "I've prepared some recommendations for your $travelTime trip to $selectedDestination. Enjoy exploring!";
+    switch (selectedInterest) {
+      case 'beach':
+        return [
+          ItineraryDay(
+            title: "Day 1: Arrival & Beach Relaxation",
+            activities: [
+              ItineraryActivity(
+                title: "Airport Transfer",
+                description: "Private transfer to your beachfront resort",
+                time: "2:00 PM",
+                duration: 45,
+              ),
+              ItineraryActivity(
+                title: "Beach Welcome",
+                description: "Relax on the pristine beach with welcome drinks",
+                time: "3:00 PM",
+                duration: 120,
+              ),
+              ItineraryActivity(
+                title: "Sunset Dinner",
+                description: "Fresh seafood dinner by the ocean",
+                time: "7:00 PM",
+                price: 75.0,
+              ),
+            ],
+            imageUrl: "https://picsum.photos/id/42/600/400",
+            weather: "Sunny",
+            temperature: 28.0,
+          ),
+          ItineraryDay(
+            title: "Day 2: Water Adventures",
+            activities: [
+              ItineraryActivity(
+                title: "Snorkeling Tour",
+                description: "Explore vibrant coral reefs and marine life",
+                time: "9:00 AM",
+                duration: 180,
+                price: 45.0,
+              ),
+              ItineraryActivity(
+                title: "Beach Lunch",
+                description: "Local cuisine at beachside restaurant",
+                time: "1:00 PM",
+                price: 35.0,
+              ),
+              ItineraryActivity(
+                title: "Sunset Cruise",
+                description: "Relaxing boat tour with drinks and snacks",
+                time: "5:00 PM",
+                duration: 120,
+                price: 60.0,
+              ),
+            ],
+            imageUrl: "https://picsum.photos/id/43/600/400",
+            weather: "Partly Cloudy",
+            temperature: 27.0,
+          ),
+        ];
+      // Add more cases for other interests...
+      default:
+        return [];
     }
   }
 
@@ -243,53 +158,121 @@ class AiConversationService {
         return "When would you like to travel?";
       case TravelStage.timeSelected:
         return "What activities are you interested in?";
+      case TravelStage.activitySelected:
+        return "What's your budget range?";
+      case TravelStage.budgetSelected:
+        return "Would you like to see recommendations?";
       case TravelStage.complete:
         return "Ask me anything about your trip...";
     }
   }
 
-  /// Get list of activities based on selected interest
-  static List<String> getActivitiesForInterest(String selectedInterest) {
-    if (selectedInterest == 'beach') {
-      return [
-        "Swimming & Snorkeling",
-        "Beach Relaxation",
-        "Water Sports",
-        "Coastal Hiking",
-        "Local Cuisine"
-      ];
-    } else if (selectedInterest == 'mountain') {
-      return [
-        "Hiking & Trekking",
-        "Scenic Views",
-        "Wildlife Watching",
-        "Photography",
-        "Local Culture"
-      ];
-    } else if (selectedInterest == 'city') {
-      return [
-        "Museums & Galleries",
-        "Historical Sites",
-        "Shopping",
-        "Nightlife",
-        "Local Cuisine"
-      ];
-    } else if (selectedInterest == 'food') {
-      return [
-        "Food Tours",
-        "Cooking Classes",
-        "Local Markets",
-        "Fine Dining",
-        "Street Food"
-      ];
+  /// Get assistant message for the current stage
+  static String getAssistantMessageForStage(
+    TravelStage stage,
+    String selectedInterest,
+    String selectedDestination,
+    String travelTime,
+  ) {
+    switch (stage) {
+      case TravelStage.welcome:
+        return "Hi! I'm your AI travel assistant. Let's plan your perfect trip!";
+      case TravelStage.interestSelected:
+        return "Great choice! Here are some amazing destinations for $selectedInterest lovers:";
+      case TravelStage.destinationSelected:
+        return "Perfect! $selectedDestination is an excellent choice. When would you like to visit?";
+      case TravelStage.timeSelected:
+        return "I see you're planning a $travelTime trip to $selectedDestination. What activities interest you?";
+      case TravelStage.activitySelected:
+        return "I've noted your activity preferences. What's your budget range?";
+      case TravelStage.budgetSelected:
+        return "Thanks! I'll create a personalized itinerary within your budget.";
+      case TravelStage.complete:
+        return "Here's your personalized trip plan for $selectedDestination!";
+    }
+  }
+
+  /// Handle follow-up questions in the complete stage
+  static String handleFollowUpQuestion(String input, String selectedDestination, String travelTime) {
+    if (input.contains('weather') || input.contains('temperature')) {
+      return "The weather in $selectedDestination during $travelTime is typically perfect for travel!";
+    } else if (input.contains('hotel') || input.contains('accommodation')) {
+      return "I can recommend some great hotels in $selectedDestination. Would you like to see options?";
+    } else if (input.contains('food') || input.contains('restaurant')) {
+      return "There are many amazing restaurants in $selectedDestination. I can suggest some based on your preferences.";
     } else {
-      return [
-        "Sightseeing",
-        "Cultural Experiences",
-        "Adventure Activities",
-        "Relaxation",
-        "Local Cuisine"
-      ];
+      return "I'd be happy to help with that! What specific information would you like about $selectedDestination?";
+    }
+  }
+
+  /// Get activities based on interest category
+  static List<String> getActivitiesForInterest(String interest) {
+    switch (interest.toLowerCase()) {
+      case 'beach':
+        return [
+          'Snorkeling',
+          'Sunbathing',
+          'Beach Volleyball',
+          'Surfing',
+          'Beach Yoga',
+          'Jet Skiing',
+          'Parasailing',
+          'Beach Picnic',
+          'Sunset Cruise',
+          'Beach Photography'
+        ];
+      case 'mountain':
+        return [
+          'Hiking',
+          'Mountain Biking',
+          'Rock Climbing',
+          'Camping',
+          'Photography',
+          'Wildlife Watching',
+          'Mountain Yoga',
+          'Stargazing',
+          'Skiing',
+          'Snowboarding'
+        ];
+      case 'city':
+        return [
+          'Museum Tours',
+          'Shopping',
+          'Food Tours',
+          'Architecture',
+          'Nightlife',
+          'Local Markets',
+          'City Walks',
+          'Cultural Shows',
+          'Public Transport',
+          'Street Photography'
+        ];
+      case 'adventure':
+        return [
+          'Zip Lining',
+          'White Water Rafting',
+          'Bungee Jumping',
+          'Scuba Diving',
+          'Paragliding',
+          'Cave Exploring',
+          'ATV Riding',
+          'Cliff Jumping',
+          'Wildlife Safari',
+          'Off-Roading'
+        ];
+      default:
+        return [
+          'Local Cuisine',
+          'Cultural Experiences',
+          'Photography',
+          'Shopping',
+          'Nature Walks',
+          'Historical Sites',
+          'Local Markets',
+          'Art Galleries',
+          'Music & Dance',
+          'Relaxation'
+        ];
     }
   }
 }

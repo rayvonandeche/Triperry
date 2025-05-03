@@ -6,6 +6,8 @@ enum TravelStage {
   interestSelected,
   destinationSelected,
   timeSelected,
+  activitySelected,
+  budgetSelected,
   complete,
 }
 
@@ -14,12 +16,27 @@ class ConversationMessage {
   final bool isUser;
   final String text;
   final DateTime timestamp;
+  final MessageType type;
+  final Map<String, dynamic>? metadata;
   
   const ConversationMessage({
     required this.isUser,
     required this.text,
     required this.timestamp,
+    this.type = MessageType.text,
+    this.metadata,
   });
+}
+
+/// Types of messages that can be displayed
+enum MessageType {
+  text,
+  image,
+  video,
+  map,
+  itinerary,
+  booking,
+  suggestion,
 }
 
 /// Represents a travel destination option
@@ -28,25 +45,80 @@ class TravelOption {
   final String description;
   final String imageUrl;
   final List<String> activities;
+  final double rating;
+  final int reviewCount;
+  final Map<String, dynamic>? details;
   
   const TravelOption({
     required this.name,
     required this.description,
     required this.imageUrl,
     required this.activities,
+    this.rating = 4.5,
+    this.reviewCount = 100,
+    this.details,
   });
 }
 
 /// Represents a day in the travel itinerary
 class ItineraryDay {
   final String title;
-  final List<String> activities;
+  final List<ItineraryActivity> activities;
+  final String? imageUrl;
+  final String? weather;
+  final double? temperature;
   
   const ItineraryDay({
     required this.title,
     required this.activities,
+    this.imageUrl,
+    this.weather,
+    this.temperature,
   });
 }
+
+/// Represents an activity in the itinerary
+class ItineraryActivity {
+  final String title;
+  final String description;
+  final String time;
+  final String? location;
+  final String? imageUrl;
+  final double? price;
+  final int? duration;
+  
+  const ItineraryActivity({
+    required this.title,
+    required this.description,
+    required this.time,
+    this.location,
+    this.imageUrl,
+    this.price,
+    this.duration,
+  });
+}
+
+/// Represents a budget range for travel planning
+class BudgetRange {
+  final String label;
+  final double min;
+  final double max;
+  final String currency;
+  
+  const BudgetRange({
+    required this.label,
+    required this.min,
+    required this.max,
+    required this.currency,
+  });
+}
+
+/// Pre-defined budget ranges
+const List<BudgetRange> budgetRanges = [
+  BudgetRange(label: "Budget", min: 0, max: 1000, currency: "USD"),
+  BudgetRange(label: "Mid-range", min: 1000, max: 3000, currency: "USD"),
+  BudgetRange(label: "Luxury", min: 3000, max: 10000, currency: "USD"),
+];
 
 /// Pre-defined beach destination options
 const List<TravelOption> beachDestinations = [
@@ -55,18 +127,42 @@ const List<TravelOption> beachDestinations = [
     description: "Paradise island with stunning beaches, temples, and tropical vibes",
     imageUrl: "https://picsum.photos/id/42/600/400",
     activities: ["Beach relaxation", "Surfing", "Temple visits", "Balinese massage"],
+    rating: 4.8,
+    reviewCount: 2500,
+    details: {
+      "bestTime": "April to October",
+      "flightTime": "12-15 hours",
+      "language": "Indonesian, English",
+      "currency": "IDR",
+    },
   ),
   TravelOption(
     name: "Maldives",
     description: "Pristine white sand beaches and crystal-clear turquoise waters",
     imageUrl: "https://picsum.photos/id/43/600/400",
     activities: ["Snorkeling", "Overwater bungalow stay", "Spa treatments", "Sunset cruises"],
+    rating: 4.9,
+    reviewCount: 1800,
+    details: {
+      "bestTime": "November to April",
+      "flightTime": "10-12 hours",
+      "language": "Dhivehi, English",
+      "currency": "MVR",
+    },
   ),
   TravelOption(
     name: "Amalfi Coast, Italy",
     description: "Breathtaking Mediterranean coastline with colorful villages",
     imageUrl: "https://picsum.photos/id/44/600/400",
     activities: ["Coastal drives", "Beach clubs", "Italian cuisine", "Boat tours"],
+    rating: 4.7,
+    reviewCount: 3200,
+    details: {
+      "bestTime": "May to September",
+      "flightTime": "8-10 hours",
+      "language": "Italian, English",
+      "currency": "EUR",
+    },
   ),
 ];
 

@@ -33,109 +33,68 @@ class ActivitySelectionStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: slideAnimation,
-      child: FadeTransition(
-        opacity: fadeAnimation,
+    final activities = AiConversationService.getActivitiesForInterest(selectedInterest);
+    
+    return FadeTransition(
+      opacity: fadeAnimation,
+      child: SlideTransition(
+        position: slideAnimation,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Trip summary card
-            Container(
-              margin: const EdgeInsets.only(bottom: 20),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Your Trip",
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "$selectedDestination in $travelTime",
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Divider(color: Colors.white24, thickness: 1, height: 24),
-                  Text(
-                    "What activities are you interested in?",
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Activity options
-            _buildActivityOptions(context),
-            
-            const SizedBox(height: 16),
-            
             Text(
-              "Or tell me specific activities you're interested in.",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontStyle: FontStyle.italic,
-                color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
+              "What activities interest you for your $travelTime trip to $selectedDestination?",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 24),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: activities.map((activity) {
+                return ActionChip(
+                  label: Text(
+                    activity,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  onPressed: () => onSelectChip(activity),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Popular Activities",
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Based on your interest in $selectedInterest, these activities are highly recommended for $selectedDestination during $travelTime.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
               ),
-              textAlign: TextAlign.center,
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  /// Builds the activity option chips
-  Widget _buildActivityOptions(BuildContext context) {
-    final activities = AiConversationService.getActivitiesForInterest(selectedInterest);
-    
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: activities.map((activity) => _buildActivityChip(context, activity)).toList(),
-    );
-  }
-
-  /// Builds an individual activity chip
-  Widget _buildActivityChip(BuildContext context, String activity) {
-    return GestureDetector(
-      onTap: () => onSelectChip("I'm interested in $activity"),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Text(
-          activity,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSecondaryContainer,
-          ),
         ),
       ),
     );
