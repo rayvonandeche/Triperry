@@ -245,7 +245,7 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
       body: Column(
         children: [
           // Fixed top padding for status bar
-          SizedBox(height: MediaQuery.of(context).padding.top),
+          SizedBox(height: MediaQuery.of(context).padding.top + AppBar().preferredSize.height),
           
           // AI Assistant Header with enhanced design
           AssistantHeader(
