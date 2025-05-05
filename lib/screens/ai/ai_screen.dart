@@ -357,7 +357,7 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.98),
       body: Column(
         children: [
           // Fixed top padding for status bar
@@ -392,12 +392,14 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                         colors: [
-                          Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                          Theme.of(context).scaffoldBackgroundColor,
+                          Theme.of(context).colorScheme.primary.withOpacity(0.03),
+                          Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                          Theme.of(context).scaffoldBackgroundColor.withOpacity(0.02),
                         ],
+                        stops: const [0.05, 0.4, 1],
                       ),
                     ),
                   ),
@@ -407,9 +409,22 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 400),
                   child: _isThinking
-                      ? const Center(
-                          child: ThinkingIndicator(
-                            currentPrompt: '',
+                      ? Container(
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              center: Alignment.center,
+                              radius: 0.8,
+                              colors: [
+                                Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1),
+                              ],
+                              stops: const [0.0, 1.0],
+                            ),
+                          ),
+                          child: const Center(
+                            child: ThinkingIndicator(
+                              currentPrompt: '',
+                            ),
                           ),
                         )
                       : SingleChildScrollView(
@@ -454,12 +469,36 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
             ),
           ),
           
-          // Enhanced input area with suggestions
+          // Enhanced input area with backdrop blur and gradient
           if (!_formCompleted)
-            InputArea(
-              textController: _textController,
-              inputHint: AiConversationService.getInputHintForStage(_currentStage),
-              onSubmit: _processUserInput,
+            ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).primaryColor.withOpacity(0.85),
+                        Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -3),
+                      ),
+                    ],
+                  ),
+                  child: InputArea(
+                    textController: _textController,
+                    inputHint: AiConversationService.getInputHintForStage(_currentStage),
+                    onSubmit: _processUserInput,
+                  ),
+                ),
+              ),
             ),
         ],
       ),
@@ -472,33 +511,73 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(
-            Icons.check_circle,
-            color: Colors.green,
-            size: 64,
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.green.shade300,
+                  Colors.green,
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.3),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.check,
+              color: Colors.white,
+              size: 42,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             "Booking Confirmed!",
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.headlineSmall?.color?.withOpacity(0.9),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             "Your trip to ${_bookingDetails!['destination']} has been booked successfully.",
             textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
+            ),
           ),
           
           const SizedBox(height: 32),
           
-          // Booking details card
+          // Booking details card with gradient
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.green),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).cardColor,
+                  Theme.of(context).cardColor.withOpacity(0.9),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.green.withOpacity(0.5), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                  spreadRadius: 1,
+                ),
+              ],
             ),
             child: Column(
               children: [
