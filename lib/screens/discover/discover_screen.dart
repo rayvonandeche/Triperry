@@ -473,6 +473,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
     }
   }
 
+  String _formatDateRange(DateTime startDate, DateTime endDate) {
+    final start = "${startDate.day}/${startDate.month}/${startDate.year}";
+    final end = "${endDate.day}/${endDate.month}/${endDate.year}";
+    return "$start - $end";
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -503,7 +509,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       const SizedBox(height: 8),
                       if (!isLoading && photos.isNotEmpty)
                         SizedBox(
-                          height: MediaQuery.of(context).size.width * 0.6,
+                          height: MediaQuery.of(context).size.width * 0.7,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: 3,
@@ -562,10 +568,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            'Dates: ${DateTime.now().add(Duration(days: i * 5)).toLocal()} - ${DateTime.now().add(Duration(days: i * 5 + 3)).toLocal()}',
-                                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            'Dates: ${_formatDateRange(DateTime.now().add(Duration(days: i * 5)), DateTime.now().add(Duration(days: i * 5 + 3)))}',
+                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                                   color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
                                                 ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
@@ -1242,10 +1250,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            'Dates: ${DateTime.now().add(Duration(days: i * 5)).toLocal()} - ${DateTime.now().add(Duration(days: i * 5 + 3)).toLocal()}',
-                                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            'Dates: ${_formatDateRange(DateTime.now().add(Duration(days: i * 5)), DateTime.now().add(Duration(days: i * 5 + 3)))}',
+                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                                   color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
                                                 ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
