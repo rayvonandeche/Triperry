@@ -502,165 +502,142 @@ class _DiscoverPageState extends State<DiscoverPage> with TickerProviderStateMix
         ),
         children: [
           // Packages carousel
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: AnimatedBuilder(
-              animation: widget.containerController,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: widget.scaleAnimations[0].value,
-                  child: Opacity(
-                    opacity: widget.fadeAnimations[0].value,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Packages for You',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).textTheme.titleLarge?.color?.withOpacity(0.9),
-                              ),
+          _buildSection(
+            context: context,
+            title: 'Packages for You',
+            index: 0,
+            contentBuilder: (context) => !isLoading && photos.isNotEmpty
+              ? SizedBox(
+                  height: MediaQuery.of(context).size.width * 0.7,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 3,
+                    itemBuilder: (context, i) {
+                      final photo = photos[i];
+                      return Container(
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Theme.of(context).colorScheme.surface.withOpacity(0.98),
+                              Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                            ],
+                            stops: const [0.3, 1.0],
+                          ),
+                          border: Border.all(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white.withOpacity(0.1)
+                                : Colors.black.withOpacity(0.05),
+                            width: 0.8,
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        if (!isLoading && photos.isNotEmpty)
-                          SizedBox(
-                            height: MediaQuery.of(context).size.width * 0.7,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: 3,
-                              itemBuilder: (context, i) {
-                                final photo = photos[i];
-                                return Container(
-                                  width: MediaQuery.of(context).size.width * 0.7,
-                                  margin: const EdgeInsets.only(right: 12),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Theme.of(context).colorScheme.surface.withOpacity(0.98),
-                                        Theme.of(context).colorScheme.surface.withOpacity(0.9),
-                                      ],
-                                      stops: const [0.3, 1.0],
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.08),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                        spreadRadius: 1,
-                                      ),
-                                    ],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(16),
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Stack(
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius: const BorderRadius.vertical(
-                                              top: Radius.circular(16),
-                                            ),
-                                            child: CachedNetworkImage(
-                                              imageUrl: photo.src.medium,
-                                              height: MediaQuery.of(context).size.width * 0.4,
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
-                                              placeholder: (context, url) => Container(
-                                                height: MediaQuery.of(context).size.width * 0.4,
-                                                color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-                                                child: const Center(child: CircularProgressIndicator()),
-                                              ),
-                                              errorWidget: (context, url, error) => Container(
-                                                height: MediaQuery.of(context).size.width * 0.4,
-                                                color: Colors.grey[300],
-                                                child: const Icon(Icons.broken_image, size: 40),
-                                              ),
-                                            ),
-                                          ),
-                                          // Add a gradient overlay for better text readability
-                                          Positioned(
-                                            bottom: 0,
-                                            left: 0,
-                                            right: 0,
-                                            height: 50,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  begin: Alignment.topCenter,
-                                                  end: Alignment.bottomCenter,
-                                                  colors: [
-                                                    Colors.transparent,
-                                                    Colors.black.withOpacity(0.3),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
+                                  child: CachedNetworkImage(
+                                    imageUrl: photo.src.medium,
+                                    height: MediaQuery.of(context).size.width * 0.4,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Container(
+                                      height: MediaQuery.of(context).size.width * 0.4,
+                                      color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                      child: const Center(child: CircularProgressIndicator()),
+                                    ),
+                                    errorWidget: (context, url, error) => Container(
+                                      height: MediaQuery.of(context).size.width * 0.4,
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.broken_image, size: 40),
+                                    ),
+                                  ),
+                                ),
+                                // Add a gradient overlay for better text readability
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  height: 50,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black.withOpacity(0.3),
                                         ],
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(12.0),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Planned Trip: ${photo.alt}',
-                                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Dates: ${_formatDateRange(DateTime.now().add(Duration(days: i * 5)), DateTime.now().add(Duration(days: i * 5 + 3)))}',
-                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
-                                                  ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Join your buddies for this trip!',
-                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                    color: Theme.of(context).colorScheme.primary,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                );
-                              },
+                                ),
+                              ],
                             ),
-                          )
-                        else
-                          Container(
-                            height: MediaQuery.of(context).size.width * 0.6,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
-                                  Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.2),
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Planned Trip: ${photo.alt}',
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Dates: ${_formatDateRange(DateTime.now().add(Duration(days: i * 5)), DateTime.now().add(Duration(days: i * 5 + 3)))}',
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                                        ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Join your buddies for this trip!',
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                  ),
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(16),
                             ),
-                            child: const Center(child: CircularProgressIndicator()),
-                          ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                )
+              : Container(
+                  height: MediaQuery.of(context).size.width * 0.6,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).colorScheme.surface.withOpacity(0.4),
+                        Theme.of(context).colorScheme.surface.withOpacity(0.2),
                       ],
                     ),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                );
-              },
-            ),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
           ),
+
+          const SizedBox(height: 16),
 
           // Travel categories horizontal list
           Padding(
@@ -704,7 +681,13 @@ class _DiscoverPageState extends State<DiscoverPage> with TickerProviderStateMix
                                           Theme.of(context).colorScheme.surface.withOpacity(0.75),
                                         ],
                                 ),
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Colors.white.withOpacity(0.2)
+                                      : Theme.of(context).dividerColor.withOpacity(0.2),
+                                  width: 0.8,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: (isSelected 
@@ -739,660 +722,573 @@ class _DiscoverPageState extends State<DiscoverPage> with TickerProviderStateMix
             ),
           ),
 
-          const SizedBox(height: 16),
-
           // Featured destination carousel
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: AnimatedBuilder(
-              animation: widget.containerController,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: widget.scaleAnimations[1].value,
-                  child: Opacity(
-                    opacity: widget.fadeAnimations[1].value,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Featured ${_categories[_selectedCategoryIndex]}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).textTheme.titleLarge?.color?.withOpacity(0.9),
-                                  ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(
-                                foregroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
-                              ),
-                              child: const Text('See All'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        if (!isLoading &&
-                            _categorizedPhotos[
-                                    _categories[_selectedCategoryIndex]] !=
-                                null)
-                          ImageCarousel(
-                            photos: _categorizedPhotos[
-                                _categories[_selectedCategoryIndex]]!,
-                            height: MediaQuery.of(context).size.width * 0.6,
-                          )
-                        else
-                          Container(
-                            height: MediaQuery.of(context).size.width * 0.6,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceVariant
-                                  .withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child:
-                                const Center(child: CircularProgressIndicator()),
-                          ),
-                      ],
-                    ),
+          _buildSection(
+            context: context,
+            title: 'Featured ${_categories[_selectedCategoryIndex]}',
+            index: 1,
+            showSeeAll: true,
+            contentBuilder: (context) => !isLoading &&
+                  _categorizedPhotos[_categories[_selectedCategoryIndex]] != null
+              ? ImageCarousel(
+                  photos: _categorizedPhotos[_categories[_selectedCategoryIndex]]!,
+                  height: MediaQuery.of(context).size.width * 0.6,
+                )
+              : Container(
+                  height: MediaQuery.of(context).size.width * 0.6,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceVariant
+                        .withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                );
-              },
-            ),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
           ),
 
           const SizedBox(height: 24),
 
           // Trending travel experiences with enhanced gradients
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: AnimatedBuilder(
-              animation: widget.containerController,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: widget.scaleAnimations[2].value,
-                  child: Opacity(
-                    opacity: widget.fadeAnimations[2].value,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Trending Travel Experiences',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).textTheme.titleLarge?.color?.withOpacity(0.9),
-                              ),
+          _buildSection(
+            context: context,
+            title: 'Trending Travel Experiences',
+            index: 2,
+            contentBuilder: (context) => !isLoading && photos.isNotEmpty
+              ? ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: 3,
+                  itemBuilder: (context, i) {
+                    final photo = photos[i];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(containerPadding),
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(24)),
+                        border: Border.all(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.08)),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            [
+                              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.4),
+                              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
+                            ],
+                            [
+                              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.4),
+                              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.2),
+                            ],
+                            [
+                              Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.4),
+                              Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.2),
+                            ],
+                          ][i],
                         ),
-                        if (!isLoading && photos.isNotEmpty)
-                          ListView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: 3,
-                            itemBuilder: (context, i) {
-                              final photo = photos[i];
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(containerPadding),
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                      const BorderRadius.all(Radius.circular(24)),
-                                  border: Border.all(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withOpacity(0.08)),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      [
-                                        Theme.of(context).colorScheme.primaryContainer.withOpacity(0.4),
-                                        Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
-                                      ],
-                                      [
-                                        Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.4),
-                                        Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.2),
-                                      ],
-                                      [
-                                        Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.4),
-                                        Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.2),
-                                      ],
-                                    ][i],
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.06),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                      spreadRadius: 0.5,
-                                    ),
-                                  ],
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                            spreadRadius: 0.5,
+                          ),
+                        ],
+                      ),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: CachedNetworkImage(
+                                imageUrl: photo.src.medium,
+                                fit: BoxFit.cover,
+                                width: MediaQuery.of(context).size.width * 0.35,
+                                height: MediaQuery.of(context).size.width * 0.25,
+                                placeholder: (context, url) => Container(
+                                  width: MediaQuery.of(context).size.width * 0.35,
+                                  height: MediaQuery.of(context).size.width * 0.25,
+                                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                  child: const Center(child: CircularProgressIndicator()),
                                 ),
-                                child: IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: CachedNetworkImage(
-                                          imageUrl: photo.src.medium,
-                                          fit: BoxFit.cover,
-                                          width:
-                                              MediaQuery.of(context).size.width *
-                                                  0.35,
-                                          height:
-                                              MediaQuery.of(context).size.width *
-                                                  0.25,
-                                          placeholder: (context, url) => Container(
-                                            width: MediaQuery.of(context).size.width * 0.35,
-                                            height: MediaQuery.of(context).size.width * 0.25,
-                                            color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-                                            child: const Center(child: CircularProgressIndicator()),
-                                          ),
-                                          errorWidget: (context, url, error) => Container(
-                                            width: MediaQuery.of(context).size.width * 0.35,
-                                            height: MediaQuery.of(context).size.width * 0.25,
-                                            color: Colors.grey[300],
-                                            child: const Icon(Icons.broken_image, size: 40),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  photo.photographer,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .titleMedium
-                                                      ?.copyWith(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  photo.alt,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyMedium,
-                                                  maxLines: 2,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.star,
-                                                  size: 16,
-                                                  color: Colors.amber,
-                                                ),
-                                                Text(
-                                                  " ${(4.5 + (i * 0.1)).toStringAsFixed(1)}",
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodySmall,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  "• ${120 + (i * 50)}+ reviews",
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodySmall
-                                                      ?.copyWith(
-                                                        color: Colors.grey,
-                                                      ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                                  .withOpacity(0.1),
-                                            ),
-                                            child: Icon(
-                                              Icons.bookmark_border,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
+                                errorWidget: (context, url, error) => Container(
+                                  width: MediaQuery.of(context).size.width * 0.35,
+                                  height: MediaQuery.of(context).size.width * 0.25,
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.broken_image, size: 40),
                                 ),
-                              );
-                            },
-                          )
-                        else
-                          const Center(child: CircularProgressIndicator()),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // Travel inspiration with enhanced gradients
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: AnimatedBuilder(
-              animation: widget.containerController,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: widget.scaleAnimations[3].value,
-                  child: Opacity(
-                    opacity: widget.fadeAnimations[3].value,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Travel Inspiration',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).textTheme.titleLarge?.color?.withOpacity(0.9),
                               ),
-                        ),
-                        const SizedBox(height: 12),
-                        if (!isLoading && photos.isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                                  Theme.of(context).colorScheme.secondary.withOpacity(0.8),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                stops: const [0.2, 1.0],
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                  spreadRadius: 0.5,
-                                ),
-                              ],
                             ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "Personalized Travel Guides",
+                                        photo.photographer,
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleMedium
                                             ?.copyWith(
-                                              color: Colors.white,
                                               fontWeight: FontWeight.bold,
                                             ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: 4),
                                       Text(
-                                        "Discover destinations tailored to your preferences",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(
-                                              color:
-                                                  Colors.white.withOpacity(0.9),
-                                            ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      ElevatedButton(
-                                        onPressed: () {},
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          foregroundColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 16, vertical: 10),
-                                        ),
-                                        child: const Text("Explore Now"),
+                                        photo.alt,
+                                        style: Theme.of(context).textTheme.bodyMedium,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),
-                                ),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.star,
+                                        size: 16,
+                                        color: Colors.amber,
+                                      ),
+                                      Text(
+                                        " ${(4.5 + (i * 0.1)).toStringAsFixed(1)}",
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "• ${120 + (i * 50)}+ reviews",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Colors.grey,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
                                 Container(
-                                  width: 100,
-                                  height: 100,
+                                  padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border:
-                                        Border.all(color: Colors.white, width: 2),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.1),
                                   ),
-                                  child: ClipOval(
-                                    child: CachedNetworkImage(
-                                      imageUrl: photos.last.src.medium,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) => Container(
-                                        color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-                                        child: const Center(child: CircularProgressIndicator()),
-                                      ),
-                                      errorWidget: (context, url, error) => Container(
-                                        color: Colors.grey[300],
-                                        child: const Icon(Icons.broken_image, size: 40),
-                                      ),
-                                    ),
+                                  child: Icon(
+                                    Icons.bookmark_border,
+                                    color: Theme.of(context).colorScheme.primary,
+                                    size: 20,
                                   ),
                                 ),
                               ],
                             ),
-                          )
-                        else
-                          Container(
-                            height: 150,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
-                                  Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.2),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Center(child: CircularProgressIndicator()),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                )
+              : const Center(child: CircularProgressIndicator()),
           ),
 
           const SizedBox(height: 24),
 
-          // Short travel videos with enhanced styling
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: AnimatedBuilder(
-              animation: widget.containerController,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: widget.scaleAnimations[0].value,
-                  child: Opacity(
-                    opacity: widget.fadeAnimations[0].value,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          // Travel inspiration with enhanced gradients
+          _buildSection(
+            context: context,
+            title: 'Travel Inspiration',
+            index: 3,
+            contentBuilder: (context) => !isLoading && photos.isNotEmpty
+              ? Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                        Theme.of(context).colorScheme.secondary.withOpacity(0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      stops: const [0.2, 1.0],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                        spreadRadius: 0.5,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Personalized Travel Guides",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Discover destinations tailored to your preferences",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.white.withOpacity(0.9),
+                                  ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Theme.of(context).colorScheme.primary,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              ),
+                              child: const Text("Explore Now"),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: photos.last.src.medium,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                              child: const Center(child: CircularProgressIndicator()),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.broken_image, size: 40),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Container(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+                        Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.2),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Short travel videos
+          _buildSection(
+            context: context,
+            title: 'Short Travel Videos',
+            index: 0,
+            contentBuilder: (context) => Column(
+              children: [
+                if (!isLoading && _travelShorts.isNotEmpty)
+                  SizedBox(
+                    // Fixed height for the video carousel
+                    height: MediaQuery.of(context).size.width * 0.75,
+                    child: PageView.builder(
+                      controller: _videoPageController,
+                      itemCount: null,
+                      itemBuilder: (context, index) {
+                        final actualIndex = _getActualVideoIndex(index);
+                        if (actualIndex >= _travelShorts.length) {
+                          return const SizedBox.shrink();
+                        }
+                        final video = _travelShorts[actualIndex];
+                        
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: VideoCard(
+                            video: video,
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/video',
+                                arguments: video,
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                else
+                  Container(
+                    height: MediaQuery.of(context).size.width * 0.6,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceVariant
+                          .withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
+                
+                // Video page indicator dots with better spacing
+                if (!isLoading && _travelShorts.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(_travelShorts.length, (index) {
+                        final currentVisibleIndex = _getActualVideoIndex(_currentVideoPage);
+                        
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: index == currentVisibleIndex
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.3),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          // Additional packages section with refined spacing
+          _buildSection(
+            context: context,
+            title: 'More Travel Packages',
+            index: 4,
+            contentBuilder: (context) => !isLoading && photos.isNotEmpty
+              ? ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: 3,
+                  itemBuilder: (context, i) {
+                    final photo = photos[i];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.08)),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Theme.of(context).colorScheme.surface,
+                            Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                            spreadRadius: 0.5,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: CachedNetworkImage(
+                              imageUrl: photo.src.medium,
+                              fit: BoxFit.cover,
+                              width: MediaQuery.of(context).size.width * 0.35,
+                              height: MediaQuery.of(context).size.width * 0.25,
+                              placeholder: (context, url) => Container(
+                                width: MediaQuery.of(context).size.width * 0.35,
+                                height: MediaQuery.of(context).size.width * 0.25,
+                                color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                child: const Center(child: CircularProgressIndicator()),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                width: MediaQuery.of(context).size.width * 0.35,
+                                height: MediaQuery.of(context).size.width * 0.25,
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.broken_image, size: 40),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Planned Trip: ${photo.alt}',
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Dates: ${_formatDateRange(DateTime.now().add(Duration(days: i * 5)), DateTime.now().add(Duration(days: i * 5 + 3)))}',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                                      ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Join your buddies for this trip!',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                )
+              : Container(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+                        Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.2),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+          ),
+
+          // Extra bottom spacing to ensure content isn't covered by navigation bar
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to build consistent section layouts
+  Widget _buildSection({
+    required BuildContext context,
+    required String title,
+    required int index,
+    required Widget Function(BuildContext) contentBuilder,
+    bool showSeeAll = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: AnimatedBuilder(
+        animation: widget.containerController,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: widget.scaleAnimations[index % widget.scaleAnimations.length].value,
+            child: Opacity(
+              opacity: widget.fadeAnimations[index % widget.fadeAnimations.length].value,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Short Travel Videos',
+                          title,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).textTheme.titleLarge?.color?.withOpacity(0.9),
                               ),
                         ),
-                        const SizedBox(height: 12),
-                        if (!isLoading && _travelShorts.isNotEmpty)
-                          SizedBox(
-                            // Increase height to properly fit all content
-                            height: MediaQuery.of(context).size.width * 0.75,
-                            child: PageView.builder(
-                              controller: _videoPageController,
-                              // Set itemCount to null for unlimited/infinite items
-                              itemCount: null,
-                              itemBuilder: (context, index) {
-                                // Get the actual video index using modulo
-                                final actualIndex = _getActualVideoIndex(index);
-                                if (actualIndex >= _travelShorts.length) {
-                                  return const SizedBox.shrink();
-                                }
-                                final video = _travelShorts[actualIndex];
-                                
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 4.0),
-                                  child: VideoCard(
-                                    video: video,
-                                    onTap: () {
-                                      // Handle video tap
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/video',
-                                        arguments: video,
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
+                        if (showSeeAll)
+                          TextButton(
+                            onPressed: () {},
+                            style: TextButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                side: BorderSide(
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                                  width: 0.8,
+                                ),
+                              ),
                             ),
-                          )
-                        else
-                          Container(
-                            height: MediaQuery.of(context).size.width * 0.6,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceVariant
-                                  .withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child:
-                                const Center(child: CircularProgressIndicator()),
-                          ),
-                        // Video page indicator dots
-                        if (!isLoading && _travelShorts.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children:
-                                  List.generate(_travelShorts.length, (index) {
-                                // Map the current infinite page to the visible page indicator 
-                                final currentVisibleIndex = _getActualVideoIndex(_currentVideoPage);
-                                
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 4),
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: index == currentVisibleIndex
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .primary
-                                            .withOpacity(0.3),
-                                  ),
-                                );
-                              }),
-                            ),
+                            child: const Text('See All'),
                           ),
                       ],
                     ),
                   ),
-                );
-              },
+                  const SizedBox(height: 12),
+                  contentBuilder(context),
+                ],
+              ),
             ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Packages section with enhanced styling
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: AnimatedBuilder(
-              animation: widget.containerController,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: widget.scaleAnimations[4].value,
-                  child: Opacity(
-                    opacity: widget.fadeAnimations[4].value,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Packages for You',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).textTheme.titleLarge?.color?.withOpacity(0.9),
-                                ),
-                          ),
-                          if (!isLoading && photos.isNotEmpty)
-                            ListView.builder(
-                              physics: const NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              itemCount: 3,
-                              itemBuilder: (context, i) {
-                                final photo = photos[i];
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  padding: const EdgeInsets.all(containerPadding),
-                                  decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.all(Radius.circular(24)),
-                                    border: Border.all(
-                                        color: Theme.of(context).colorScheme.primary.withOpacity(0.08)),
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Theme.of(context).colorScheme.surface,
-                                        Theme.of(context).colorScheme.surface.withOpacity(0.9),
-                                      ],
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.06),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
-                                        spreadRadius: 0.5,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: CachedNetworkImage(
-                                          imageUrl: photo.src.medium,
-                                          fit: BoxFit.cover,
-                                          width: MediaQuery.of(context).size.width * 0.35,
-                                          height: MediaQuery.of(context).size.width * 0.25,
-                                          placeholder: (context, url) => Container(
-                                            width: MediaQuery.of(context).size.width * 0.35,
-                                            height: MediaQuery.of(context).size.width * 0.25,
-                                            color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-                                            child: const Center(child: CircularProgressIndicator()),
-                                          ),
-                                          errorWidget: (context, url, error) => Container(
-                                            width: MediaQuery.of(context).size.width * 0.35,
-                                            height: MediaQuery.of(context).size.width * 0.25,
-                                            color: Colors.grey[300],
-                                            child: const Icon(Icons.broken_image, size: 40),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Planned Trip: ${photo.alt}',
-                                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Dates: ${_formatDateRange(DateTime.now().add(Duration(days: i * 5)), DateTime.now().add(Duration(days: i * 5 + 3)))}',
-                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
-                                                  ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Join your buddies for this trip!',
-                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                    color: Theme.of(context).colorScheme.primary,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            )
-                          else
-                            Container(
-                              height: 150,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
-                                    Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.2),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Center(child: CircularProgressIndicator()),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 24),
-        ],
+          );
+        },
       ),
     );
   }

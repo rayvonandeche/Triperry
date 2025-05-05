@@ -49,6 +49,10 @@ class AssistantHeader extends StatelessWidget {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 0.8,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
@@ -105,7 +109,10 @@ class AssistantHeader extends StatelessWidget {
                       onPressed: onToggleTap,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
-                        side: BorderSide(color: Colors.white.withOpacity(0.6)),
+                        side: BorderSide(color: Colors.white.withOpacity(0.6), width: 0.8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       child: Text(toggleLabel),
                     ),

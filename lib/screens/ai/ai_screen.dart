@@ -1162,8 +1162,18 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
           ),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Theme.of(context).dividerColor.withOpacity(0.2),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.15)
+                : Theme.of(context).colorScheme.primary.withOpacity(0.08),
+            width: 0.8,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).shadowColor.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1318,8 +1328,18 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
           ),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Theme.of(context).dividerColor.withOpacity(0.2),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.15)
+                : Theme.of(context).colorScheme.primary.withOpacity(0.08),
+            width: 0.8,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).shadowColor.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

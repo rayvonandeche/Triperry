@@ -12,7 +12,7 @@ class BuddiesScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // App bar
+          // App bar with enhanced gradients
           SliverAppBar(
             expandedHeight: 200,
             floating: false,
@@ -25,9 +25,10 @@ class BuddiesScreen extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       shadows: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 4,
+                          color: Colors.black.withOpacity(0.4),
+                          blurRadius: 6,
                           offset: const Offset(0, 2),
+                          spreadRadius: 1,
                         ),
                       ],
                     ),
@@ -38,10 +39,11 @@ class BuddiesScreen extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppTheme.primaryColor.withBlue(AppTheme.primaryColor.blue + 20),
-                      AppTheme.primaryColor,
-                      AppTheme.primaryColor.withRed(AppTheme.primaryColor.red + 30).withOpacity(0.85),
+                      AppTheme.primaryColor.withBlue(AppTheme.primaryColor.blue + 30).withOpacity(0.95),
+                      AppTheme.primaryColor.withOpacity(0.9),
+                      AppTheme.primaryColor.withRed(AppTheme.primaryColor.red + 30).withOpacity(0.8),
                     ],
+                    stops: const [0.0, 0.5, 1.0],
                   ),
                 ),
                 child: Stack(
@@ -54,7 +56,7 @@ class BuddiesScreen extends StatelessWidget {
                         height: 200,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withOpacity(0.15),
                         ),
                       ),
                     ),
@@ -66,7 +68,7 @@ class BuddiesScreen extends StatelessWidget {
                         height: 200,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withOpacity(0.15),
                         ),
                       ),
                     ),
@@ -78,32 +80,49 @@ class BuddiesScreen extends StatelessWidget {
 
           // Content
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // Search bar
+                // Search bar with improved visuals
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).cardColor.withOpacity(0.97),
+                        Theme.of(context).cardColor.withOpacity(0.87),
+                      ],
+                      stops: const [0.3, 1.0],
+                    ),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.08)
+                          : Colors.black.withOpacity(0.05),
+                      width: 0.8,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Theme.of(context).shadowColor.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
+                        color: Theme.of(context).shadowColor.withOpacity(0.12),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                        spreadRadius: 0,
                       ),
                     ],
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.search, color: Colors.grey),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
                           decoration: const InputDecoration(
                             hintText: 'Search buddies...',
                             border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 8.0),
                           ),
                           onChanged: (value) {
                             // Handle search
@@ -120,38 +139,45 @@ class BuddiesScreen extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Active trips section
-                Text(
-                  'Active Trips',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Text(
+                    'Active Trips',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
                 ),
-                const SizedBox(height: 16),
                 _buildActiveTrips(),
 
                 const SizedBox(height: 24),
 
                 // Buddies list
-                Text(
-                  'Your Buddies',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Text(
+                    'Your Buddies',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
                 ),
-                const SizedBox(height: 16),
                 _buildBuddiesList(),
+                
+                // Add bottom padding to ensure content isn't covered by FAB
+                const SizedBox(height: 80),
               ]),
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Add new buddy
-        },
-        backgroundColor: AppTheme.primaryColor,
-        child: const Icon(Icons.person_add_rounded),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     // Add new buddy
+      //   },
+      //   backgroundColor: AppTheme.primaryColor,
+      //   child: const Icon(Icons.person_add_rounded),
+      // ),
     );
   }
 
@@ -160,93 +186,107 @@ class BuddiesScreen extends StatelessWidget {
     final demoVideos = pexelsService.getDemoVideos();
 
     return SizedBox(
-      height: 200,
+      height: 210,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: demoVideos.length,
+        padding: EdgeInsets.zero,
         itemBuilder: (context, index) {
           final video = demoVideos[index];
           return Container(
-            width: 280,
-            margin: const EdgeInsets.only(right: 16),
+            width: 260, // Slightly narrower for better visuals
+            margin: EdgeInsets.only(
+              right: index == demoVideos.length - 1 ? 0 : 16
+            ),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).shadowColor.withOpacity(0.15),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                  spreadRadius: 1,
-                ),
-              ],
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Theme.of(context).cardColor,
-                  Theme.of(context).cardColor.withOpacity(0.95),
+                  Theme.of(context).cardColor.withOpacity(0.97),
+                  Theme.of(context).cardColor.withOpacity(0.87),
                 ],
-                stops: const [0.0, 1.0],
+                stops: const [0.3, 1.0],
               ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withOpacity(0.08)
+                    : Colors.black.withOpacity(0.04),
+                width: 0.8,
+              ),
+              // boxShadow: [
+              //   BoxShadow(
+              //     color: Theme.of(context).shadowColor.withOpacity(0.15),
+              //     blurRadius: 15,
+              //     offset: const Offset(0, 6),
+              //     spreadRadius: 0.5,
+              //   ),
+              // ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: [
-                // Trip image
+                // Trip image - consistent height
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16),
                   ),
                   child: CachedNetworkImage(
                     imageUrl: video.thumbnailUrl,
-                    height: 120,
+                    height: 130, // Fixed height for consistency
                     width: double.infinity,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
-                      height: 120,
+                      height: 130,
                       color: Theme.of(context).primaryColor.withOpacity(0.1),
                       child: const Center(child: CircularProgressIndicator()),
                     ),
                     errorWidget: (context, url, error) => Image.network(
                       'https://picsum.photos/id/${(index + 1) * 10}/800/450',
-                      height: 120,
+                      height: 130,
                       width: double.infinity,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
-                        height: 120,
+                        height: 130,
                         color: Theme.of(context).primaryColor.withOpacity(0.1),
                         child: Icon(Icons.error_outline, color: Theme.of(context).primaryColor),
                       ),
                     ),
                   ),
                 ),
-                // Trip details
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2), // Reduced vertical padding further
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min, // Keep this to ensure column doesn't expand unnecessarily
-                      children: [
-                        Text(
-                          video.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                          maxLines: 2, // Allow title to wrap
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2), // Reduced spacing
-                        Text(
-                          '${['3', '5', '2'][index % 3]} buddies',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
-                              ),
-                        ),
-                      ],
-                    ),
+                // Trip details - consistent padding
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        video.title,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.people,
+                            size: 16,
+                            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${['3', '5', '2'][index % 3]} buddies',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -269,6 +309,7 @@ class BuddiesScreen extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: demoVideos.length,
+      padding: EdgeInsets.zero,
       itemBuilder: (context, index) {
         final video = demoVideos[index];
         return Container(
@@ -278,21 +319,29 @@ class BuddiesScreen extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Theme.of(context).cardColor,
-                Theme.of(context).cardColor.withOpacity(0.9),
+                Theme.of(context).cardColor.withOpacity(0.97),
+                Theme.of(context).cardColor.withOpacity(0.87),
               ],
+              stops: const [0.3, 1.0],
             ),
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withOpacity(0.08)
+                  : Colors.black.withOpacity(0.04),
+              width: 0.8,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Theme.of(context).shadowColor.withOpacity(0.12),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-                spreadRadius: 0.5,
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+                spreadRadius: 0,
               ),
             ],
           ),
           child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             leading: CircleAvatar(
               radius: 24,
               backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),

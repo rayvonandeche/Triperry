@@ -30,6 +30,75 @@ class AppTheme {
   // Info color
   static const Color infoColor = Color(0xFF64B5F6);
 
+  // UI Enhancement Constants
+  static const BorderRadius defaultBorderRadius = BorderRadius.all(Radius.circular(12));
+  static const BorderRadius cardBorderRadius = BorderRadius.all(Radius.circular(16));
+  static const BorderRadius buttonBorderRadius = BorderRadius.all(Radius.circular(24));
+
+  // Border styles
+  static BoxBorder lightBorder = Border.all(
+    color: Colors.white.withOpacity(0.12),
+    width: 0.8,
+  );
+
+  static BoxBorder darkBorder = Border.all(
+    color: Colors.black.withOpacity(0.04),
+    width: 0.8,
+  );
+
+  // Widget Decorations
+  static BoxDecoration getGradientCardDecoration(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          isDark 
+              ? Colors.white.withOpacity(0.05) 
+              : Colors.white.withOpacity(0.7),
+          isDark 
+              ? Colors.white.withOpacity(0.02) 
+              : Colors.white.withOpacity(0.9),
+        ],
+      ),
+      borderRadius: cardBorderRadius,
+      border: isDark ? lightBorder : darkBorder,
+      boxShadow: [
+        BoxShadow(
+          color: isDark 
+              ? Colors.black.withOpacity(0.2) 
+              : Colors.black.withOpacity(0.06),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+          spreadRadius: 0,
+        ),
+      ],
+    );
+  }
+
+  static BoxDecoration getSubtleGradientDecoration(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          primaryColor.withOpacity(isDark ? 0.2 : 0.1),
+          primaryColor.withOpacity(isDark ? 0.05 : 0.03),
+        ],
+      ),
+      borderRadius: defaultBorderRadius,
+      border: Border.all(
+        color: primaryColor.withOpacity(isDark ? 0.2 : 0.1),
+        width: 0.8,
+      ),
+    );
+  }
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -147,4 +216,4 @@ class AppTheme {
       ),
     );
   }
-} 
+}

@@ -56,17 +56,18 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Gradient overlay
+                  // Enhanced gradient overlay with smoother transitions
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.black.withOpacity(0.4),
-                          Colors.black.withOpacity(0.7),
+                          Colors.black.withOpacity(0.2),
+                          Colors.black.withOpacity(0.5),
+                          Colors.black.withOpacity(0.8),
                         ],
-                        stops: const [0.2, 0.9],
+                        stops: const [0.1, 0.5, 0.9],
                       ),
                     ),
                   ),
@@ -80,17 +81,32 @@ class ProfileScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // Profile info
+                // Profile info - enhance container with modern gradient styling
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).cardColor.withOpacity(0.97),
+                        Theme.of(context).cardColor.withOpacity(0.87),
+                      ],
+                      stops: const [0.3, 1.0],
+                    ),
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.08)
+                          : Colors.black.withOpacity(0.04),
+                      width: 0.8,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Theme.of(context).shadowColor.withOpacity(0.1),
                         blurRadius: 10,
-                        offset: const Offset(0, 2),
+                        offset: const Offset(0, 4),
+                        spreadRadius: 1,
                       ),
                     ],
                   ),
@@ -175,6 +191,8 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _buildRecentTrips(context, demoVideos),
+
+                const SizedBox(height: 80),
               ]),
             ),
           ),
@@ -193,16 +211,21 @@ class ProfileScreen extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppTheme.primaryColor,
-                AppTheme.primaryColor.withOpacity(0.85),
+                AppTheme.primaryColor.withOpacity(0.95),
+                AppTheme.primaryColor.withOpacity(0.75),
               ],
             ),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 0.8,
+            ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.primaryColor.withOpacity(0.2),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+                color: AppTheme.primaryColor.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+                spreadRadius: 0.5,
               ),
             ],
           ),
@@ -234,16 +257,23 @@ class ProfileScreen extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).cardColor,
-            Theme.of(context).cardColor.withOpacity(0.92),
+            Theme.of(context).cardColor.withOpacity(0.97),
+            Theme.of(context).cardColor.withOpacity(0.85),
           ],
+          stops: const [0.3, 1.0],
         ),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.04),
+          width: 0.8,
+        ),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).shadowColor.withOpacity(0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
             spreadRadius: 0.5,
           ),
         ],
@@ -301,16 +331,23 @@ class ProfileScreen extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).cardColor,
-            Theme.of(context).cardColor.withOpacity(0.92),
+            Theme.of(context).cardColor.withOpacity(0.97),
+            Theme.of(context).cardColor.withOpacity(0.85),
           ],
+          stops: const [0.3, 1.0],
         ),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.04),
+          width: 0.8,
+        ),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).shadowColor.withOpacity(0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
             spreadRadius: 0.5,
           ),
         ],
