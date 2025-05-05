@@ -110,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen>
     final List<Widget> actions;
 
     if (showAI) {
-      title = 'AI Assistant';
+      title = 'Triperry';
       actions = [
         IconButton(
           icon: const Icon(Icons.help_outline_rounded),

@@ -4,19 +4,10 @@ import 'dart:ui';
 import 'animations/ai_animations.dart';
 import 'models/ai_models.dart';
 import 'services/ai_conversation_service.dart';
-import 'widgets/activity_selection_stage.dart';
 import 'widgets/assistant_header.dart';
-import 'widgets/budget_selection_stage.dart';
 import 'widgets/conversation_history.dart';
-import 'widgets/destination_options.dart';
-import 'widgets/final_recommendations_stage.dart';
-import 'widgets/history_toggle_button.dart';
 import 'widgets/input_area.dart';
 import 'widgets/thinking_indicator.dart';
-import 'widgets/time_selection_stage.dart';
-import 'widgets/welcome_stage.dart';
-import 'widgets/quick_trip_form.dart';
-import 'widgets/trip_query_intake_stage.dart';
 import 'widgets/travel_recommendations_stage.dart';
 
 class AiPage extends StatefulWidget {
@@ -425,86 +416,78 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
             stops: const [0.0, 0.5, 1.0],
           ),
         ),
-        child: Column(
-          children: [
-            // Fixed top padding for status bar
-            SizedBox(height: MediaQuery.of(context).padding.top + AppBar().preferredSize.height),
-            
-            // AI Assistant Header with enhanced design
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: AssistantHeader(
-                assistantMessage: _tripBooked 
-                    ? "Thank you for booking! Your trip details have been confirmed."
-                    : _tripData.isNotEmpty
-                        ? "Here are your travel recommendations based on your preferences!"
-                        : AiConversationService.getAssistantMessageForStage(
-                            _currentStage,
-                            _selectedInterest,
-                            _selectedDestination,
-                            _travelTime,
-                          ),
-                slideAnimation: AiAnimations.createHeaderSlideAnimation(_headerController),
-                fadeAnimation: AiAnimations.createFadeAnimation(_headerController),
-                showToggleButton: false,
+        child: SafeArea( // Added SafeArea to handle status bar
+          child: Column(
+            children: [
+              // AI Assistant Header with enhanced design
+              Padding(
+                padding: EdgeInsets.fromLTRB(8, MediaQuery.of(context).padding.top + 8, 8, 0),
+                child: AssistantHeader(
+                  assistantMessage: _tripBooked 
+                      ? "Thank you for booking! Your trip details have been confirmed."
+                      : _tripData.isNotEmpty
+                          ? "Here are your travel recommendations based on your preferences!"
+                          : AiConversationService.getAssistantMessageForStage(
+                              _currentStage,
+                              _selectedInterest,
+                              _selectedDestination,
+                              _travelTime,
+                            ),
+                  slideAnimation: AiAnimations.createHeaderSlideAnimation(_headerController),
+                  fadeAnimation: AiAnimations.createFadeAnimation(_headerController),
+                  showToggleButton: false,
+                ),
               ),
-            ),
-            
-            // Main content area with smooth transitions
-            Expanded(
-              child: Stack(
-                children: [
-                  // Background gradient for visual appeal
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Theme.of(context).colorScheme.primary.withOpacity(0.03),
-                            Theme.of(context).colorScheme.secondary.withOpacity(0.2),
-                            Theme.of(context).scaffoldBackgroundColor.withOpacity(0.02),
-                          ],
-                          stops: const [0.1, 0.4, 1],
+              
+              // Main content area with smooth transitions
+              Expanded(
+                child: Stack(
+                  children: [
+                    // Background gradient for visual appeal
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Theme.of(context).colorScheme.primary.withOpacity(0.03),
+                              Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                              Theme.of(context).scaffoldBackgroundColor.withOpacity(0.02),
+                            ],
+                            stops: const [0.1, 0.4, 1],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  
-                  // Main content with smooth transitions
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    child: _isThinking
-                        ? Container(
-                            decoration: BoxDecoration(
-                              gradient: RadialGradient(
-                                center: Alignment.center,
-                                radius: 0.8,
-                                colors: [
-                                  Theme.of(context).colorScheme.surface.withOpacity(0.5),
-                                  Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1),
-                                ],
-                                stops: const [0.0, 1.0],
+                    
+                    // Main content with smooth transitions
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      child: _isThinking
+                          ? Container(
+                              decoration: BoxDecoration(
+                                gradient: RadialGradient(
+                                  center: Alignment.center,
+                                  radius: 0.8,
+                                  colors: [
+                                    Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1),
+                                  ],
+                                  stops: const [0.0, 1.0],
+                                ),
                               ),
-                            ),
-                            child: const Center(
-                              child: ThinkingIndicator(
-                                currentPrompt: '',
+                              child: const Center(
+                                child: ThinkingIndicator(
+                                  currentPrompt: '',
+                                ),
                               ),
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            controller: _scrollController,
-                            child: Padding(
+                            )
+                          : Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 16),
-                                  
-                                  // Stage-specific content with enhanced animations
-                                  FadeTransition(
+                              child: _tripData.isNotEmpty || _tripBooked
+                                // For recommendations and booking screens
+                                ? FadeTransition(
                                     opacity: _fadeController,
                                     child: SlideTransition(
                                       position: Tween<Offset>(
@@ -516,40 +499,76 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
                                       )),
                                       child: _buildCurrentStage(),
                                     ),
-                                  ),
-                                  
-                                  const SizedBox(height: 24),
-                                  
-                                  // Enhanced conversation history
-                                  if (_showHistory)
-                                    ConversationHistoryWidget(
-                                      conversationHistory: _conversationHistory,
+                                  )
+                                // For other conversation stages
+                                : SingleChildScrollView(
+                                    controller: _scrollController,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(height: 16),
+                                        
+                                        // Stage-specific content with enhanced animations
+                                        FadeTransition(
+                                          opacity: _fadeController,
+                                          child: SlideTransition(
+                                            position: Tween<Offset>(
+                                              begin: const Offset(0, 0.1),
+                                              end: Offset.zero,
+                                            ).animate(CurvedAnimation(
+                                              parent: _slideController,
+                                              curve: Curves.easeOutCubic,
+                                            )),
+                                            child: _buildCurrentStage(),
+                                          ),
+                                        ),
+                                        
+                                        const SizedBox(height: 24),
+                                        
+                                        // Enhanced conversation history
+                                        if (_showHistory)
+                                          ConversationHistoryWidget(
+                                            conversationHistory: _conversationHistory,
+                                          ),
+                                        
+                                        const SizedBox(height: 100), // Space for input area
+                                      ],
                                     ),
-                                  
-                                  const SizedBox(height: 100), // Space for input area
-                                ],
-                              ),
+                                  ),
                             ),
-                          ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Enhanced input area with backdrop blur and gradient
-            if (!_formCompleted)
-              ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                  child: InputArea(
-                    textController: _textController,
-                    inputHint: AiConversationService.getInputHintForStage(_currentStage),
-                    onSubmit: _processUserInput,
-                    suggestions: _getSuggestionsForCurrentStage(),
-                  ),
+                    ),
+                  ],
                 ),
               ),
-          ],
+              
+              // Enhanced input area with backdrop blur and gradient
+              if (!_formCompleted)
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomLeft,
+                      colors: [
+                        Theme.of(context).primaryColor.withOpacity(0.1),
+                        Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                      ],
+                      stops: const [-0.8, 1.0],
+                    ),
+                  ),
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                      child: InputArea(
+                        textController: _textController,
+                        inputHint: AiConversationService.getInputHintForStage(_currentStage),
+                        onSubmit: _processUserInput,
+                        suggestions: _getSuggestionsForCurrentStage(),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
