@@ -10,12 +10,24 @@ class AssistantHeader extends StatelessWidget {
   
   /// Animation for fade effect
   final Animation<double> fadeAnimation;
+  
+  /// Whether to show the toggle button
+  final bool showToggleButton;
+  
+  /// Label for the toggle button
+  final String toggleLabel;
+  
+  /// Callback when toggle button is tapped
+  final VoidCallback? onToggleTap;
 
   const AssistantHeader({
     super.key,
     required this.assistantMessage,
     required this.slideAnimation,
     required this.fadeAnimation,
+    this.showToggleButton = false,
+    this.toggleLabel = "",
+    this.onToggleTap,
   });
 
   @override
@@ -45,40 +57,60 @@ class AssistantHeader extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
             children: [
-              CircleAvatar(
-                backgroundColor: Colors.white,
-                radius: 28, // Increased size for better visibility
-                child: Icon(
-                  Icons.assistant_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 32, // Increased icon size
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Triperry AI',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white.withOpacity(0.95), // Enhanced contrast
-                        fontWeight: FontWeight.bold,
-                      ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.white,
+                    radius: 28, // Increased size for better visibility
+                    child: Icon(
+                      Icons.assistant_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 32, // Increased icon size
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      assistantMessage,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
-                      ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Triperry AI',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: Colors.white.withOpacity(0.95), // Enhanced contrast
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          assistantMessage,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              
+              if (showToggleButton && onToggleTap != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton(
+                      onPressed: onToggleTap,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: BorderSide(color: Colors.white.withOpacity(0.6)),
+                      ),
+                      child: Text(toggleLabel),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

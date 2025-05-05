@@ -253,3 +253,59 @@ const List<TravelOption> popularDestinations = [
     activities: ["Zip-lining", "Wildlife watching", "Surfing", "Rainforest hikes"],
   ),
 ];
+
+class TravelRecommendation {
+  final String title;
+  final String description;
+  final HotelDetails hotelDetails;
+  final FlightDetails flightDetails;
+  final List<String> activities;
+  double totalPrice;
+  final String duration;
+  final List<String> accessibilityFeatures;
+
+  TravelRecommendation({
+    required this.title,
+    required this.description,
+    required this.hotelDetails,
+    required this.flightDetails,
+    required this.activities,
+    required this.totalPrice,
+    required this.duration,
+    required this.accessibilityFeatures,
+  });
+}
+
+class HotelDetails {
+  final String name;
+  final double rating;
+  final double pricePerNight;
+  final List<String> features;
+  final List<String> images;
+
+  HotelDetails({
+    required this.name,
+    required this.rating,
+    required this.pricePerNight,
+    required this.features,
+    required this.images,
+  });
+}
+
+class FlightDetails {
+  final String airline;
+  final String departureTime;
+  final String returnTime;
+  final int stopCount;
+  final double price;
+  final List<String> features;
+
+  FlightDetails({
+    required this.airline,
+    required this.departureTime,
+    required this.returnTime,
+    required this.stopCount,
+    required this.price,
+    required this.features,
+  });
+}

@@ -16,6 +16,8 @@ import 'widgets/thinking_indicator.dart';
 import 'widgets/time_selection_stage.dart';
 import 'widgets/welcome_stage.dart';
 import 'widgets/quick_trip_form.dart';
+import 'widgets/trip_query_intake_stage.dart';
+import 'widgets/travel_recommendations_stage.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({Key? key}) : super(key: key);
@@ -50,6 +52,12 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
 
   // Add new state variables for quick form data
   Map<String, dynamic>? _quickFormData;
+  
+  // State for conversational trip planning
+  bool _formCompleted = false;
+  Map<String, dynamic> _tripData = {};
+  bool _tripBooked = false;
+  Map<String, dynamic>? _bookingDetails;
 
   @override
   void initState() {
@@ -242,6 +250,9 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
       _travelOptions = [];
       _selectedBudget = null;
       _quickFormData = null;
+      _tripData = {};
+      _tripBooked = false;
+      _bookingDetails = null;
       
       // Reset animations
       _fadeController.reset();
@@ -309,6 +320,39 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
     if (budget < 3000) return 'Mid-range';
     return 'Luxury';
   }
+  
+  void _handleTripQueryComplete(Map<String, dynamic> tripData) {
+    setState(() {
+      _tripData = tripData;
+      
+      // Reset animations
+      _fadeController.reset();
+      _slideController.reset();
+      _fadeController.forward();
+      _slideController.forward();
+    });
+  }
+  
+  void _handleBookTrip(Map<String, dynamic> bookingDetails) {
+    setState(() {
+      _bookingDetails = bookingDetails;
+      _tripBooked = true;
+      
+      // Reset animations
+      _fadeController.reset();
+      _slideController.reset();
+      _fadeController.forward();
+      _slideController.forward();
+      
+      // Add booking to conversation history
+      _addToConversationHistory(
+        false, 
+        "Your trip to ${bookingDetails['destination']} has been booked! Booking reference: ${bookingDetails['bookingNumber']}",
+        type: MessageType.booking,
+        metadata: bookingDetails
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -323,14 +367,19 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: AssistantHeader(
-              assistantMessage: AiConversationService.getAssistantMessageForStage(
-                _currentStage,
-                _selectedInterest,
-                _selectedDestination,
-                _travelTime,
-              ),
+              assistantMessage: _tripBooked 
+                  ? "Thank you for booking! Your trip details have been confirmed."
+                  : _tripData.isNotEmpty
+                      ? "Here are your travel recommendations based on your preferences!"
+                      : AiConversationService.getAssistantMessageForStage(
+                          _currentStage,
+                          _selectedInterest,
+                          _selectedDestination,
+                          _travelTime,
+                        ),
               slideAnimation: AiAnimations.createHeaderSlideAnimation(_headerController),
               fadeAnimation: AiAnimations.createFadeAnimation(_headerController),
+              showToggleButton: false,
             ),
           ),
           
@@ -406,90 +455,138 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
           ),
           
           // Enhanced input area with suggestions
-          InputArea(
-            textController: _textController,
-            inputHint: AiConversationService.getInputHintForStage(_currentStage),
-            onSubmit: _processUserInput,
-          ),
+          if (!_formCompleted)
+            InputArea(
+              textController: _textController,
+              inputHint: AiConversationService.getInputHintForStage(_currentStage),
+              onSubmit: _processUserInput,
+            ),
         ],
       ),
     );
   }
 
   Widget _buildCurrentStage() {
-    if (_quickFormData == null) {
-      return QuickTripForm(
-        onFormComplete: _handleQuickFormComplete,
-        fadeAnimation: _fadeController,
-        slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
+    // If using conversational UI
+    if (_tripBooked && _bookingDetails != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.check_circle,
+            color: Colors.green,
+            size: 64,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Booking Confirmed!",
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Your trip to ${_bookingDetails!['destination']} has been booked successfully.",
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 32),
+          
+          // Booking details card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.green),
+            ),
+            child: Column(
+              children: [
+                // Booking reference
+                Row(
+                  children: [
+                    const Text("Booking Reference:"),
+                    const Spacer(),
+                    Text(
+                      _bookingDetails!['bookingNumber'],
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                
+                // Package name
+                Row(
+                  children: [
+                    const Text("Package:"),
+                    const Spacer(),
+                    Text(
+                      _bookingDetails!['package'],
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                
+                // Total price
+                Row(
+                  children: [
+                    const Text("Total Price:"),
+                    const Spacer(),
+                    Text(
+                      "\$${(_bookingDetails!['totalPrice'] as double).toStringAsFixed(2)}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 32),
+          
+          // Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _resetPlanning,
+                icon: const Icon(Icons.refresh),
+                label: const Text("Plan Another Trip"),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.email),
+                label: const Text("View Confirmation"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ],
       );
     }
-
-    switch (_currentStage) {
-      case TravelStage.welcome:
-        return WelcomeStage(
-          onSelectChip: _selectChip,
-          fadeAnimation: _fadeController,
-        );
-      case TravelStage.interestSelected:
-        return DestinationOptionsStage(
-          selectedInterest: _selectedInterest,
-          travelOptions: _travelOptions,
-          onSelectChip: _selectChip,
-          slideAnimation: AiAnimations.createHorizontalSlideAnimation(_slideController),
-          fadeAnimation: _fadeController,
-        );
-      case TravelStage.destinationSelected:
-        return TimeSelectionStage(
-          selectedDestination: _selectedDestination,
-          fadeAnimation: _fadeController,
-          onSelectChip: _selectChip,
-        );
-      case TravelStage.timeSelected:
-        return ActivitySelectionStage(
-          selectedDestination: _selectedDestination,
-          travelTime: _travelTime,
-          selectedInterest: _selectedInterest,
-          slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
-          fadeAnimation: _fadeController,
-          onSelectChip: _selectChip,
-        );
-      case TravelStage.activitySelected:
-        return ActivitySelectionStage(
-          selectedDestination: _selectedDestination,
-          travelTime: _getSeasonFromDates(_quickFormData!['startDate']),
-          selectedInterest: _selectedInterest,
-          slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
-          fadeAnimation: _fadeController,
-          onSelectChip: (activity) {
-            setState(() {
-              _currentStage = TravelStage.complete;
-            });
-          },
-        );
-      case TravelStage.budgetSelected:
-        return FinalRecommendationsStage(
-          selectedDestination: _selectedDestination,
-          travelTime: _getSeasonFromDates(_quickFormData!['startDate']),
-          selectedInterest: _selectedInterest,
-          selectedBudget: _selectedBudget,
-          slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
-          fadeAnimation: _fadeController,
-          onSelectChip: _selectChip,
-          onResetPlanning: _resetPlanning,
-        );
-      case TravelStage.complete:
-        return FinalRecommendationsStage(
-          selectedDestination: _selectedDestination,
-          travelTime: _getSeasonFromDates(_quickFormData!['startDate']),
-          selectedInterest: _selectedInterest,
-          selectedBudget: _selectedBudget,
-          slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
-          fadeAnimation: _fadeController,
-          onSelectChip: _selectChip,
-          onResetPlanning: _resetPlanning,
-        );
+    
+    if (_tripData.isNotEmpty) {
+      return TravelRecommendationsStage(
+        tripData: _tripData,
+        fadeAnimation: _fadeController,
+        slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
+        onRestart: _resetPlanning,
+        onBookTrip: _handleBookTrip,
+      );
     }
+    
+    return TripQueryIntakeStage(
+      onFormComplete: _handleTripQueryComplete,
+      fadeAnimation: _fadeController,
+      slideAnimation: AiAnimations.createVerticalSlideAnimation(_slideController),
+    );
   }
 
   String _getSeasonFromDates(DateTime date) {

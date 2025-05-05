@@ -207,23 +207,22 @@ class BuddiesScreen extends StatelessWidget {
                 // Trip details
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), // Further reduced vertical padding
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2), // Reduced vertical padding further
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.min, // Keep this to ensure column doesn't expand unnecessarily
                       children: [
                         Text(
                           video.title,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
-                          maxLines: 2,
+                          maxLines: 2, // Allow title to wrap
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2), // Reduced spacing
                         Text(
                           '${['3', '5', '2'][index % 3]} buddies',
-                          
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
                               ),
@@ -327,4 +326,4 @@ class BuddiesScreen extends StatelessWidget {
       },
     );
   }
-} 
+}
