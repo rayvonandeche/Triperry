@@ -170,3 +170,36 @@ class DestinationOptionsStage extends StatelessWidget {
     );
   }
 }
+
+/// Widget that displays destination options as chips
+class DestinationOptions extends StatelessWidget {
+  /// List of travel destination options to display
+  final List<TravelOption> destinations;
+  
+  /// Callback when a destination is selected
+  final Function(String) onSelect;
+
+  const DestinationOptions({
+    super.key,
+    required this.destinations,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: destinations.map((destination) {
+        return ActionChip(
+          label: Text(destination.name),
+          onPressed: () => onSelect(destination.name),
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          labelStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
+        );
+      }).toList(),
+    );
+  }
+}

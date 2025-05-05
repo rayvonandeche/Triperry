@@ -61,8 +61,22 @@ class AiConversationService {
   }
 
   /// Process user input for activity preferences
-  static TravelStage processActivityPreferences(String input) {
-    // In a real app, this would generate personalized recommendations
+  static TravelStage processActivityPreferences(String input, void Function(String) onActivitiesSelected) {
+    String activities = "general activities";
+    
+    if (input.contains('adventure') || input.contains('hiking') || input.contains('outdoor')) {
+      activities = "adventure and outdoor activities";
+    } else if (input.contains('relax') || input.contains('spa') || input.contains('beach')) {
+      activities = "relaxation and leisure activities";
+    } else if (input.contains('culture') || input.contains('museum') || input.contains('history')) {
+      activities = "cultural and historical activities";
+    } else if (input.contains('food') || input.contains('dining') || input.contains('cuisine')) {
+      activities = "food and dining experiences";
+    } else if (input.contains('shop') || input.contains('market') || input.contains('mall')) {
+      activities = "shopping and market experiences";
+    }
+    
+    onActivitiesSelected(activities);
     return TravelStage.activitySelected;
   }
 

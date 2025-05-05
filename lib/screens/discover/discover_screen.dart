@@ -482,16 +482,17 @@ class _DiscoverPageState extends State<DiscoverPage> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Add a subtle background gradient to the entire page
+      // Unified smooth opacity gradient background
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
             Theme.of(context).scaffoldBackgroundColor.withOpacity(0.97),
-            Theme.of(context).scaffoldBackgroundColor,
+            Theme.of(context).scaffoldBackgroundColor.withOpacity(0.90),
+            Theme.of(context).scaffoldBackgroundColor.withOpacity(0.80),
           ],
-          stops: const [0.0, 0.8],
+          stops: const [0.0, 0.3, 1.0],
         ),
       ),
       child: ListView(
