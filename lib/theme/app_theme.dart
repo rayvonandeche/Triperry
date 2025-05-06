@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Primary colors
@@ -100,6 +101,8 @@ class AppTheme {
   }
 
   static ThemeData get lightTheme {
+    final textTheme = GoogleFonts.nunitoTextTheme(ThemeData.light().textTheme);
+    
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
@@ -117,9 +120,8 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: darkText),
-        titleTextStyle: const TextStyle(
+        titleTextStyle: textTheme.titleLarge?.copyWith(
           color: darkText,
-          fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -141,24 +143,13 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(color: darkText),
-        displayMedium: TextStyle(color: darkText),
-        displaySmall: TextStyle(color: darkText),
-        headlineLarge: TextStyle(color: darkText),
-        headlineMedium: TextStyle(color: darkText),
-        headlineSmall: TextStyle(color: darkText),
-        titleLarge: TextStyle(color: darkText),
-        titleMedium: TextStyle(color: darkText),
-        titleSmall: TextStyle(color: darkText),
-        bodyLarge: TextStyle(color: darkText),
-        bodyMedium: TextStyle(color: darkText),
-        bodySmall: TextStyle(color: darkText),
-      ),
+      textTheme: textTheme,
     );
   }
 
   static ThemeData get darkTheme {
+    final textTheme = GoogleFonts.nunitoTextTheme(ThemeData.dark().textTheme);
+    
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
@@ -176,9 +167,8 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: lightText),
-        titleTextStyle: const TextStyle(
+        titleTextStyle: textTheme.titleLarge?.copyWith(
           color: lightText,
-          fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -200,20 +190,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(color: lightText),
-        displayMedium: TextStyle(color: lightText),
-        displaySmall: TextStyle(color: lightText),
-        headlineLarge: TextStyle(color: lightText),
-        headlineMedium: TextStyle(color: lightText),
-        headlineSmall: TextStyle(color: lightText),
-        titleLarge: TextStyle(color: lightText),
-        titleMedium: TextStyle(color: lightText),
-        titleSmall: TextStyle(color: lightText),
-        bodyLarge: TextStyle(color: lightText),
-        bodyMedium: TextStyle(color: lightText),
-        bodySmall: TextStyle(color: lightText),
-      ),
+      textTheme: textTheme,
     );
   }
 }

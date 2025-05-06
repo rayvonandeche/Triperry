@@ -8,7 +8,9 @@ Widget _buildDrawer({
   required void Function(void Function()) setState,
 }) {
   final UserAccountsDrawerHeader drawerHeader = UserAccountsDrawerHeader(
+
     decoration: BoxDecoration(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       gradient: LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -18,6 +20,9 @@ Widget _buildDrawer({
           AppTheme.primaryColor.withRed(AppTheme.primaryColor.red + 15).withOpacity(0.8),
         ],
         stops: const [0.0, 0.5, 1.0],
+      ),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.08),
       ),
       boxShadow: [
         BoxShadow(
@@ -168,11 +173,14 @@ Widget _buildDrawer({
             context: context,
           ),
           
-          const Divider(height: 32, thickness: 1),
+                 Divider(
+            thickness: 4,
+            color: Theme.of(context).primaryColor.withOpacity(0.1),
+          ),
           
           // AI Assistant
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -246,7 +254,10 @@ Widget _buildDrawer({
           ),
           
           // Divider between regular options and sign out
-          const Divider(height: 32, thickness: 1),
+          Divider(
+            thickness: 4,
+            color: Theme.of(context).primaryColor.withOpacity(0.1),
+          ),
           
           // Sign out option
           _buildDrawerItem(
@@ -322,7 +333,7 @@ Widget _buildDrawerItem({
       : null;
 
   return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    margin: const EdgeInsets.symmetric(horizontal: 4),
     decoration: decoration,
     child: ListTile(
       leading: Icon(
@@ -340,7 +351,7 @@ Widget _buildDrawerItem({
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
       visualDensity: const VisualDensity(horizontal: 0, vertical: -1),
     ),
   );

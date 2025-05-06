@@ -482,7 +482,7 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
             children: [
               // AI Assistant Header
               Padding(
-                padding: EdgeInsets.fromLTRB(8, MediaQuery.of(context).padding.top + 8, 8, 0),
+                padding: EdgeInsets.fromLTRB(8, MediaQuery.of(context).padding.top + 16, 8, 0),
                 child: AssistantHeader(
                   assistantMessage: _useQuickForm == null
                       ? "Welcome! Let's plan your perfect trip."
