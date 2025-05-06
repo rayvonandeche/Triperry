@@ -938,22 +938,35 @@ class TravelDataService {
   /// Gets detailed data for a specific destination
   /// This method combines various data points from other methods
   Future<Map<String, dynamic>> getDestinationData(String location) async {
-    // Combine data from existing methods
-    final details = getDestinationDetails(location);
-    final data = <String, dynamic>{...details};
-    
-    // Add best times to travel
-    final travelTimes = getBestTimesToTravel(location);
-    if (travelTimes.isNotEmpty) {
-      data['bestTimes'] = travelTimes['bestTimes'];
+    try {
+      // Get destination details safely
+      final details = getDestinationDetails(location);
+      
+      // Create a new map to avoid modifying the original
+      final data = <String, dynamic>{};
+      
+      // Only copy if details actually contains information for this location
+      if (details.isNotEmpty && details.containsKey('description')) {
+        data.addAll(details);
+      }
+      
+      // Add best times to travel if available
+      final travelTimes = getBestTimesToTravel(location);
+      if (travelTimes.isNotEmpty && travelTimes.containsKey('bestTimes')) {
+        data['bestTimes'] = travelTimes['bestTimes'];
+      }
+      
+      // Add travel tips if available
+      final tips = getTravelTips(location, '');
+      if (tips.isNotEmpty) {
+        data['tips'] = tips;
+      }
+      
+      return data;
+    } catch (e) {
+      debugPrint('Error retrieving destination data: $e');
+      // Return empty map if there's an error
+      return <String, dynamic>{};
     }
-    
-    // Add travel tips
-    final tips = getTravelTips(location, '');
-    if (tips.isNotEmpty) {
-      data['tips'] = tips;
-    }
-    
-    return data;
   }
 }

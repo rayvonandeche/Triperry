@@ -234,9 +234,11 @@ class _TravelRecommendationsStageState extends State<TravelRecommendationsStage>
       opacity: widget.fadeAnimation,
       child: SlideTransition(
         position: widget.slideAnimation,
-        child: SingleChildScrollView( // Added SingleChildScrollView to handle potential overflow
+        child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            // Here's the fix: setting mainAxisSize to min to prevent unbounded height issue
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Animated destination header
               FadeTransition(
@@ -298,6 +300,7 @@ class _TravelRecommendationsStageState extends State<TravelRecommendationsStage>
               Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min, // Add this to fix layout
                   children: List.generate(recommendations.length, (index) {
                     return Container(
                       width: 8,
@@ -325,6 +328,7 @@ class _TravelRecommendationsStageState extends State<TravelRecommendationsStage>
                     end: Offset.zero,
                   ).animate(_itemAnimations[3]),
                   child: Row(
+                    mainAxisSize: MainAxisSize.max, // Ensure this row takes full width
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
@@ -789,446 +793,440 @@ class _TravelRecommendationsStageState extends State<TravelRecommendationsStage>
   Widget _buildDetailedView(BuildContext context, TravelRecommendation recommendation) {
     return FadeTransition(
       opacity: widget.fadeAnimation,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Close button and title
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: _closeDetailView,
-              ),
-              Expanded(
-                child: Text(
-                  recommendation.title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Close button and title
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _closeDetailView,
+                ),
+                Expanded(
+                  child: Text(
+                    recommendation.title,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Destination image with rating
+            SizedBox(
+              height: 200,
+              width: double.infinity,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      'https://picsum.photos/id/${100 + (widget.tripData['destination'].hashCode % 100).abs()}/800/400',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        child: const Center(child: Icon(Icons.error_outline)),
+                      ),
+                    ),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.star,
+                              color: Colors.amber.shade300,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              recommendation.hotelDetails.rating.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Destination image with rating - use fixed height
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Stack(
-                fit: StackFit.expand,
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Detail sections - put content directly in the column, no fixed height container
+            // Package summary
+            Text(
+              "Package Summary",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                    Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.15)
+                      : Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                  width: 0.8,
+                ),
+              ),
+              child: Column(
                 children: [
-                  Image.network(
-                    'https://picsum.photos/id/${100 + (widget.tripData['destination'].hashCode % 100).abs()}/800/400',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      child: Center(child: Icon(Icons.error_outline)),
-                    ),
-                  ),
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.star,
-                            color: Colors.amber.shade300,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            recommendation.hotelDetails.rating.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _buildDetailRow("Destination", widget.tripData['destination']),
+                  _buildDetailRow("Duration", recommendation.duration),
+                  _buildDetailRow("Total Price", "\$${recommendation.totalPrice.toStringAsFixed(2)}"),
                 ],
               ),
             ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Detail sections in a scrollable container
-          Expanded(
-            child: SingleChildScrollView(
+            
+            const SizedBox(height: 24),
+            
+            // Hotel details
+            Text(
+              "Hotel Details",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                    Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.15)
+                      : Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                  width: 0.8,
+                ),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Package summary
                   Text(
-                    "Package Summary",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    recommendation.hotelDetails.name,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white.withOpacity(0.15)
-                            : Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildDetailRow("Destination", widget.tripData['destination']),
-                        _buildDetailRow("Duration", recommendation.duration),
-                        _buildDetailRow("Total Price", "\$${recommendation.totalPrice.toStringAsFixed(2)}"),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Hotel details
+                  Text("Price per night: \$${recommendation.hotelDetails.pricePerNight.toStringAsFixed(2)}"),
+                  const SizedBox(height: 4),
+                  Text("Rating: ${recommendation.hotelDetails.rating} stars"),
+                  const SizedBox(height: 12),
                   Text(
-                    "Hotel Details",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    "Features:",
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white.withOpacity(0.15)
-                            : Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 4),
+                  ...recommendation.hotelDetails.features.map((feature) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
                       children: [
-                        Text(
-                          recommendation.hotelDetails.name,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Icon(
+                          Icons.check_circle_outline,
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                          size: 16,
                         ),
-                        const SizedBox(height: 8),
-                        Text("Price per night: \$${recommendation.hotelDetails.pricePerNight.toStringAsFixed(2)}"),
-                        const SizedBox(height: 4),
-                        Text("Rating: ${recommendation.hotelDetails.rating} stars"),
-                        const SizedBox(height: 12),
-                        Text(
-                          "Features:",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        ...recommendation.hotelDetails.features.map((feature) => Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.check_circle_outline,
-                                color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(feature),
-                            ],
-                          ),
-                        )),
-                        
-                        const SizedBox(height: 16),
-                        const Text("Hotel Image:"),
-                        const SizedBox(height: 8),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            recommendation.hotelDetails.images[0],
-                            height: 150,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                        const SizedBox(width: 8),
+                        Text(feature),
                       ],
                     ),
-                  ),
+                  )),
                   
-                  const SizedBox(height: 24),
-                  
-                  // Flight details
-                  Text(
-                    "Flight Details",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  const SizedBox(height: 16),
+                  const Text("Hotel Image:"),
                   const SizedBox(height: 8),
-                  
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white.withOpacity(0.15)
-                            : Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          recommendation.flightDetails.airline,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildFlightDetailRow(
-                          "Outbound",
-                          recommendation.flightDetails.departureTime,
-                          Icons.flight_takeoff,
-                          context
-                        ),
-                        const SizedBox(height: 8),
-                        _buildFlightDetailRow(
-                          "Return",
-                          recommendation.flightDetails.returnTime,
-                          Icons.flight_land,
-                          context
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          recommendation.flightDetails.stopCount == 0
-                              ? "Direct flight"
-                              : "${recommendation.flightDetails.stopCount} stop",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: recommendation.flightDetails.stopCount == 0
-                                ? Colors.green
-                                : Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          "Features:",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        ...recommendation.flightDetails.features.map((feature) => Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.check_circle_outline,
-                                color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(feature),
-                            ],
-                          ),
-                        )),
-                      ],
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      recommendation.hotelDetails.images[0],
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Activities
-                  Text(
-                    "Included Activities",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white.withOpacity(0.15)
-                            : Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ...recommendation.activities.map((activity) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.circle,
-                                size: 10,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  activity,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Accessibility features
-                  Text(
-                    "Accessibility",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white.withOpacity(0.15)
-                            : Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ...recommendation.accessibilityFeatures.map((feature) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.accessible_outlined,
-                                color: Theme.of(context).colorScheme.primary,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(feature),
-                            ],
-                          ),
-                        )),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Action buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _closeDetailView,
-                          icon: const Icon(Icons.arrow_back),
-                          label: const Text('Back'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _bookTrip,
-                          icon: const Icon(Icons.check_circle_outline),
-                          label: const Text('Book Now'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),
-          ),
-        ],
+            
+            const SizedBox(height: 24),
+            
+            // Flight details
+            Text(
+              "Flight Details",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                    Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.15)
+                      : Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                  width: 0.8,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    recommendation.flightDetails.airline,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFlightDetailRow(
+                    "Outbound",
+                    recommendation.flightDetails.departureTime,
+                    Icons.flight_takeoff,
+                    context
+                  ),
+                  const SizedBox(height: 8),
+                  _buildFlightDetailRow(
+                    "Return",
+                    recommendation.flightDetails.returnTime,
+                    Icons.flight_land,
+                    context
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    recommendation.flightDetails.stopCount == 0
+                        ? "Direct flight"
+                        : "${recommendation.flightDetails.stopCount} stop",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: recommendation.flightDetails.stopCount == 0
+                          ? Colors.green
+                          : Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Features:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  ...recommendation.flightDetails.features.map((feature) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(feature),
+                      ],
+                    ),
+                  )),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Activities
+            Text(
+              "Included Activities",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                    Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.15)
+                      : Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                  width: 0.8,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...recommendation.activities.map((activity) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.circle,
+                          size: 10,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            activity,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Accessibility features
+            Text(
+              "Accessibility",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                    Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.15)
+                      : Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                  width: 0.8,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...recommendation.accessibilityFeatures.map((feature) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.accessible_outlined,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(feature),
+                      ],
+                    ),
+                  )),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Action buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _closeDetailView,
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text('Back'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _bookTrip,
+                    icon: const Icon(Icons.check_circle_outline),
+                    label: const Text('Book Now'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
@@ -1236,9 +1234,11 @@ class _TravelRecommendationsStageState extends State<TravelRecommendationsStage>
   Widget _buildBookingConfirmation(BuildContext context, TravelRecommendation recommendation) {
     return FadeTransition(
       opacity: widget.fadeAnimation,
-      child: SingleChildScrollView( // Added SingleChildScrollView to handle potential overflow
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          // Add mainAxisSize.min to prevent unbounded height issue
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               "Confirm Your Booking",
@@ -1286,7 +1286,11 @@ class _TravelRecommendationsStageState extends State<TravelRecommendationsStage>
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                // Add mainAxisSize.min to all Column widgets
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  // ...existing code...
+                  // Keep the rest of this method the same
                   Row(
                     children: [
                       ClipRRect(
@@ -1302,6 +1306,7 @@ class _TravelRecommendationsStageState extends State<TravelRecommendationsStage>
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               recommendation.title,

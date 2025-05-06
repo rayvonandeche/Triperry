@@ -12,6 +12,9 @@ import 'widgets/travel_recommendations_stage.dart';
 import 'widgets/budget_and_season_info.dart';
 import 'widgets/quick_form.dart';
 import 'widgets/planning_style_selector.dart';
+import 'models/destination_data.dart';
+import 'widgets/destination_card.dart';
+import '../../services/destination_service.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({Key? key}) : super(key: key);
@@ -1185,38 +1188,45 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
+              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.05),
             ],
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.15)
-                : Theme.of(context).colorScheme.primary.withOpacity(0.08),
-            width: 0.8,
+                ? Colors.white.withOpacity(0.08)
+                : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            width: 0.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.1),
+              color: Theme.of(context).shadowColor.withOpacity(0.05),
               blurRadius: 8,
-              offset: const Offset(0, 3),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              size: 32,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                size: 24,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              ),
             ),
             const SizedBox(height: 12),
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: Theme.of(context).textTheme.titleMedium?.color?.withOpacity(0.9),
               ),
             ),
@@ -1225,6 +1235,7 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
               description,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                height: 1.3,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -1236,106 +1247,29 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   }
 
   Widget _buildDestinationCard(BuildContext context, TravelOption option, int index) {
-    return GestureDetector(
-      onTap: () => _processUserInput(option.name),
-      child: Container(
-        height: 180,
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Destination image
-            Positioned.fill(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  option.imageUrl,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded / 
-                                loadingProgress.expectedTotalBytes!
-                              : null,
-                        ),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      child: Center(
-                        child: Icon(
-                          Icons.image_not_supported,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            // Gradient overlay
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.center,
-                    colors: [
-                      Colors.black.withOpacity(0.8),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            // Destination info
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      option.name,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      option.description,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+    final destinationData = DestinationService.getDestinationByName(option.name);
+    if (destinationData == null) {
+      return DestinationCard(
+        destination: destinations[0],
+        onTap: () => _processUserInput(option.name),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: DestinationCard(
+        destination: destinationData,
+        onTap: () => _processUserInput(option.name),
       ),
     );
   }
@@ -1351,38 +1285,38 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
+              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.05),
             ],
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.15)
-                : Theme.of(context).colorScheme.primary.withOpacity(0.08),
-            width: 0.8,
+                ? Colors.white.withOpacity(0.08)
+                : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            width: 0.5,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              size: 32,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                size: 24,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              ),
             ),
             const SizedBox(height: 12),
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: Theme.of(context).textTheme.titleMedium?.color?.withOpacity(0.9),
               ),
             ),
@@ -1410,28 +1344,38 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
+              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.05),
             ],
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Theme.of(context).dividerColor.withOpacity(0.2),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.08)
+                : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            width: 0.5,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              size: 32,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                size: 24,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              ),
             ),
             const SizedBox(height: 12),
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: Theme.of(context).textTheme.titleMedium?.color?.withOpacity(0.9),
               ),
             ),
@@ -1440,6 +1384,7 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
               description,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                height: 1.3,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -1461,28 +1406,38 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
+              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.05),
             ],
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Theme.of(context).dividerColor.withOpacity(0.2),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.08)
+                : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            width: 0.5,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              size: 32,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                size: 24,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              ),
             ),
             const SizedBox(height: 12),
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: Theme.of(context).textTheme.titleMedium?.color?.withOpacity(0.9),
               ),
             ),
@@ -1503,67 +1458,106 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: Theme.of(context).dividerColor.withOpacity(0.2),
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+          width: 0.5,
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Your Trip Preferences',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildSummaryItem(
-              'Destination',
-              _quickFormData!['destination'],
-              Icons.location_on,
-            ),
-            _buildSummaryItem(
-              'Trip Type',
-              _quickFormData!['tripType'].toString().toUpperCase(),
-              Icons.flight,
-            ),
-            _buildSummaryItem(
-              'Duration',
-              '${_quickFormData!['duration']} days',
-              Icons.calendar_today,
-            ),
-            _buildSummaryItem(
-              'Travelers',
-              '${_quickFormData!['travelers']} people',
-              Icons.people,
-            ),
-            _buildSummaryItem(
-              'Budget',
-              '\$${_quickFormData!['budget'].toStringAsFixed(0)}',
-              Icons.attach_money,
-            ),
-            if (_quickFormData!['interests'].isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Interests',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: (_quickFormData!['interests'] as List<String>).map((interest) {
-                  return Chip(
-                    label: Text(interest),
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  );
-                }).toList(),
-              ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
+              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.05),
             ],
-          ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Your Trip Preferences',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildSummaryItem(
+                'Destination',
+                _quickFormData!['destination'],
+                Icons.location_on,
+              ),
+              _buildSummaryItem(
+                'Trip Type',
+                _quickFormData!['tripType'].toString().toUpperCase(),
+                Icons.flight,
+              ),
+              _buildSummaryItem(
+                'Duration',
+                '${_quickFormData!['duration']} days',
+                Icons.calendar_today,
+              ),
+              _buildSummaryItem(
+                'Travelers',
+                '${_quickFormData!['travelers']} people',
+                Icons.people,
+              ),
+              _buildSummaryItem(
+                'Budget',
+                '\$${_quickFormData!['budget'].toStringAsFixed(0)}',
+                Icons.attach_money,
+              ),
+              if (_quickFormData!['interests'].isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Interests',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: (_quickFormData!['interests'] as List<String>).map((interest) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                            Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        child: Text(
+                          interest,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -1574,25 +1568,45 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: Theme.of(context).colorScheme.primary,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Text(
             '$label:',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w500,
+              color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
             ),
           ),
           const SizedBox(width: 8),
           Text(
             value,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.9),
+            ),
           ),
         ],
       ),
     );
+  }
+
+  // Add method to get destinations by interest
+  List<DestinationData> _getDestinationsByInterest(String interest) {
+    return DestinationService.getDestinationsByInterest(interest);
+  }
+
+  // Add method to get destination details
+  Map<String, dynamic> _getDestinationDetails(String destinationName) {
+    return DestinationService.getDestinationDetails(destinationName);
   }
 }
