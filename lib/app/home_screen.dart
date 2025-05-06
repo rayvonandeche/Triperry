@@ -177,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 28, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 4),
         child: Container(
           height: toolbarHeight,
           padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
@@ -319,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildBottomNavigationBar(BuildContext context, int currentIndex) {
     return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 28, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 4),
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

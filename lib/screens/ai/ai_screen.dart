@@ -59,10 +59,16 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   // Add new state variable for planning style
   bool? _useQuickForm;
 
+  // Add new animation controllers for enhanced effects
+  late AnimationController _staggerController;
+  late AnimationController _rippleController;
+  late AnimationController _scaleController;
+
   @override
   void initState() {
     super.initState();
     
+    // Initialize existing controllers
     _headerController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -77,6 +83,22 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 800),
       vsync: this,
     )..forward();
+
+    // Initialize new controllers
+    _staggerController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..forward();
+
+    _rippleController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
   }
 
   @override
@@ -86,6 +108,9 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
     _headerController.dispose();
     _fadeController.dispose();
     _slideController.dispose();
+    _staggerController.dispose();
+    _rippleController.dispose();
+    _scaleController.dispose();
     super.dispose();
   }
   
@@ -531,19 +556,7 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
                                           const SizedBox(height: 24),
                                           
                                           // Stage-specific content
-                                          FadeTransition(
-                                            opacity: _fadeController,
-                                            child: SlideTransition(
-                                              position: Tween<Offset>(
-                                                begin: const Offset(0, 0.1),
-                                                end: Offset.zero,
-                                              ).animate(CurvedAnimation(
-                                                parent: _slideController,
-                                                curve: Curves.easeOutCubic,
-                                              )),
-                                              child: _buildCurrentStage(),
-                                            ),
-                                          ),
+                                          _buildCurrentStage(),
                                           
                                           const SizedBox(height: 24),
                                           
@@ -568,30 +581,7 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
               
               // Input area (only show after form completion)
               if (_formCompleted)
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomLeft,
-                      colors: [
-                        Theme.of(context).primaryColor.withOpacity(0.1),
-                        Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-                      ],
-                      stops: const [-0.8, 1.0],
-                    ),
-                  ),
-                  child: ClipRect(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                      child: InputArea(
-                        textController: _textController,
-                        inputHint: AiConversationService.getInputHintForStage(_currentStage),
-                        onSubmit: _processUserInput,
-                        suggestions: _getSuggestionsForCurrentStage(),
-                      ),
-                    ),
-                  ),
-                ),
+                _buildInputArea(),
             ],
           ),
         ),
@@ -600,6 +590,31 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   }
 
   Widget _buildCurrentStage() {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          ),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          ),
+        );
+      },
+      child: _buildStageContent(),
+    );
+  }
+
+  Widget _buildStageContent() {
     // If using conversational UI
     if (_tripBooked && _bookingDetails != null) {
       return _buildBookingConfirmation();
@@ -615,7 +630,9 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
       );
     }
 
-    // Show stage-specific content
+    // Show stage-specific content with staggered animations
+    final List<Animation<double>> staggeredAnimations = _createStaggeredAnimations(4);
+    
     switch (_currentStage) {
       case TravelStage.welcome:
         return Column(
@@ -636,39 +653,36 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
               ),
             ),
             const SizedBox(height: 24),
-            // Interactive interest cards with enhanced gradients
+            // Interactive interest cards with enhanced animations
             Wrap(
               spacing: 12,
               runSpacing: 12,
               children: [
-                _buildInterestCard(
-                  context,
-                  "Beach & Ocean",
-                  "Relax on pristine beaches and enjoy water activities",
-                  Icons.beach_access,
-                  "beach",
-                ),
-                _buildInterestCard(
-                  context,
-                  "Mountain & Nature",
-                  "Explore scenic landscapes and outdoor adventures",
-                  Icons.landscape,
-                  "mountain",
-                ),
-                _buildInterestCard(
-                  context,
-                  "City & Culture",
-                  "Experience vibrant cities and rich cultural heritage",
-                  Icons.location_city,
-                  "city",
-                ),
-                _buildInterestCard(
-                  context,
-                  "Food & Cuisine",
-                  "Discover culinary delights and local flavors",
-                  Icons.restaurant,
-                  "food",
-                ),
+                for (int i = 0; i < 4; i++)
+                  AnimatedBuilder(
+                    animation: staggeredAnimations[i],
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, 20 * (1 - staggeredAnimations[i].value)),
+                        child: Opacity(
+                          opacity: staggeredAnimations[i].value,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: _buildInterestCard(
+                      context,
+                      ["Beach & Ocean", "Mountain & Nature", "City & Culture", "Food & Cuisine"][i],
+                      [
+                        "Relax on pristine beaches and enjoy water activities",
+                        "Explore scenic landscapes and outdoor adventures",
+                        "Experience vibrant cities and rich cultural heritage",
+                        "Discover culinary delights and local flavors"
+                      ][i],
+                      [Icons.beach_access, Icons.landscape, Icons.location_city, Icons.restaurant][i],
+                      ["beach", "mountain", "city", "food"][i],
+                    ),
+                  ),
               ],
             ),
           ],
@@ -1178,71 +1192,126 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   }
 
   Widget _buildInterestCard(BuildContext context, String title, String description, IconData icon, String interest) {
-    return GestureDetector(
-      onTap: () => _processUserInput(interest),
-      child: Container(
-        width: 160,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
-              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.05),
-            ],
+    return AnimatedBuilder(
+      animation: _staggerController,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: 0.95 + (_staggerController.value * 0.05),
+          child: Opacity(
+            opacity: _staggerController.value,
+            child: GestureDetector(
+              onTapDown: (_) {
+                _scaleController.forward();
+                _rippleController.forward(from: 0.0);
+              },
+              onTapUp: (_) {
+                _scaleController.reverse();
+                _processUserInput(interest);
+              },
+              onTapCancel: () {
+                _scaleController.reverse();
+              },
+              child: AnimatedBuilder(
+                animation: _scaleController,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: 1.0 - (_scaleController.value * 0.05),
+                    child: Container(
+                      width: 160,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
+                            Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white.withOpacity(0.08)
+                              : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                          width: 0.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(context).shadowColor.withOpacity(0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        children: [
+                          // Ripple effect
+                          AnimatedBuilder(
+                            animation: _rippleController,
+                            builder: (context, child) {
+                              return Positioned.fill(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: RadialGradient(
+                                      center: Alignment.center,
+                                      radius: _rippleController.value * 2,
+                                      colors: [
+                                        Theme.of(context).colorScheme.primary.withOpacity(0.1 * (1 - _rippleController.value)),
+                                        Theme.of(context).colorScheme.primary.withOpacity(0),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          // Card content
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  icon,
+                                  size: 24,
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                title,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: Theme.of(context).textTheme.titleMedium?.color?.withOpacity(0.9),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                description,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                                  height: 1.3,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.08)
-                : Theme.of(context).colorScheme.primary.withOpacity(0.05),
-            width: 0.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                size: 24,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).textTheme.titleMedium?.color?.withOpacity(0.9),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              description,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
-                height: 1.3,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -1608,5 +1677,109 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   // Add method to get destination details
   Map<String, dynamic> _getDestinationDetails(String destinationName) {
     return DestinationService.getDestinationDetails(destinationName);
+  }
+
+  // Add method to create staggered animations for cards
+  List<Animation<double>> _createStaggeredAnimations(int count) {
+    return List.generate(count, (index) {
+      final double startInterval = index * 0.1;
+      final double endInterval = startInterval + 0.3;
+      return Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: _staggerController,
+          curve: Interval(
+            startInterval,
+            endInterval,
+            curve: Curves.easeOutCubic,
+          ),
+        ),
+      );
+    });
+  }
+
+  // Enhance the input area with animations
+  Widget _buildInputArea() {
+    return AnimatedBuilder(
+      animation: _fadeController,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, 20 * (1 - _fadeController.value)),
+          child: Opacity(
+            opacity: _fadeController.value,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomLeft,
+                  colors: [
+                    Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
+                    Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.05),
+                  ],
+                ),
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.08)
+                        : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                    width: 0.5,
+                  ),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context).shadowColor.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                    spreadRadius: 0,
+                  ),
+                ],
+              ),
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Input field with enhanced styling
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                              Theme.of(context).colorScheme.surface.withOpacity(0.6),
+                            ],
+                          ),
+                          border: Border.all(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white.withOpacity(0.08)
+                                : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                            width: 0.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).shadowColor.withOpacity(0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: InputArea(
+                          textController: _textController,
+                          inputHint: AiConversationService.getInputHintForStage(_currentStage),
+                          onSubmit: _processUserInput,
+                          suggestions: _getSuggestionsForCurrentStage(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
