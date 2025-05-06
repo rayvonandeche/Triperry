@@ -64,6 +64,9 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   late AnimationController _rippleController;
   late AnimationController _scaleController;
 
+  // Add new state variable for quick form summary expansion
+  bool _isQuickFormSummaryExpanded = false;
+
   @override
   void initState() {
     super.initState();
@@ -314,6 +317,7 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   
   void _resetPlanning() {
     setState(() {
+      // Reset all state variables
       _currentStage = TravelStage.welcome;
       _selectedInterest = "";
       _selectedDestination = "";
@@ -325,12 +329,31 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
       _tripData = {};
       _tripBooked = false;
       _bookingDetails = null;
+      _formCompleted = false;
+      _useQuickForm = null;
+      _conversationHistory = [];
+      _showHistory = false;
+      _isThinking = false;
+      _currentPrompt = "";
       
-      // Reset animations
+      // Clear text controller
+      _textController.clear();
+      
+      // Reset animations with smoother transitions
       _fadeController.reset();
       _slideController.reset();
-      _fadeController.forward();
-      _slideController.forward();
+      _staggerController.reset();
+      _rippleController.reset();
+      _scaleController.reset();
+      
+      // Forward animations with staggered timing
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _fadeController.forward();
+          _slideController.forward();
+          _staggerController.forward();
+        }
+      });
     });
   }
   
@@ -1545,88 +1568,152 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
           ),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Your Trip Preferences',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildSummaryItem(
-                'Destination',
-                _quickFormData!['destination'],
-                Icons.location_on,
-              ),
-              _buildSummaryItem(
-                'Trip Type',
-                _quickFormData!['tripType'].toString().toUpperCase(),
-                Icons.flight,
-              ),
-              _buildSummaryItem(
-                'Duration',
-                '${_quickFormData!['duration']} days',
-                Icons.calendar_today,
-              ),
-              _buildSummaryItem(
-                'Travelers',
-                '${_quickFormData!['travelers']} people',
-                Icons.people,
-              ),
-              _buildSummaryItem(
-                'Budget',
-                '\$${_quickFormData!['budget'].toStringAsFixed(0)}',
-                Icons.attach_money,
-              ),
-              if (_quickFormData!['interests'].isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Interests',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: (_quickFormData!['interests'] as List<String>).map((interest) {
-                    return Container(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header - Always visible
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _isQuickFormSummaryExpanded = !_isQuickFormSummaryExpanded;
+                });
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                            Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                          width: 0.5,
-                        ),
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        child: Text(
-                          interest,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                            fontWeight: FontWeight.w500,
+                      child: Icon(
+                        Icons.travel_explore,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Your Trip Preferences',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
+                          Text(
+                            'Tap to ${_isQuickFormSummaryExpanded ? 'collapse' : 'view details'}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    AnimatedRotation(
+                      turns: _isQuickFormSummaryExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Collapsible content
+            AnimatedCrossFade(
+              firstChild: const SizedBox.shrink(),
+              secondChild: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Divider(),
+                    const SizedBox(height: 16),
+                    _buildSummaryItem(
+                      'Destination',
+                      _quickFormData!['destination'],
+                      Icons.location_on,
+                    ),
+                    _buildSummaryItem(
+                      'Trip Type',
+                      _quickFormData!['tripType'].toString().toUpperCase(),
+                      Icons.flight,
+                    ),
+                    _buildSummaryItem(
+                      'Duration',
+                      '${_quickFormData!['duration']} days',
+                      Icons.calendar_today,
+                    ),
+                    _buildSummaryItem(
+                      'Travelers',
+                      '${_quickFormData!['travelers']} people',
+                      Icons.people,
+                    ),
+                    _buildSummaryItem(
+                      'Budget',
+                      '\$${_quickFormData!['budget'].toStringAsFixed(0)}',
+                      Icons.attach_money,
+                    ),
+                    if (_quickFormData!['interests'].isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Interests',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    );
-                  }).toList(),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: (_quickFormData!['interests'] as List<String>).map((interest) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                  Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              child: Text(
+                                interest,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ],
                 ),
-              ],
-            ],
-          ),
+              ),
+              crossFadeState: _isQuickFormSummaryExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 300),
+              sizeCurve: Curves.easeInOut,
+            ),
+          ],
         ),
       ),
     );
