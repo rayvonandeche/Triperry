@@ -32,46 +32,66 @@ class InputArea extends StatelessWidget {
         children: [
           // Suggestions with enhanced styling
           if (suggestions != null && suggestions!.isNotEmpty)
-            Container(
-              height: 40,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: suggestions!.length,
-                itemBuilder: (context, index) {
-                  final suggestion = suggestions![index];
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
-                      onTap: () => onSubmit(suggestion),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
-                              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.05),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white.withOpacity(0.08)
-                                : Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                            width: 0.5,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: Container(
+                height: 36,
+                child: ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Colors.transparent,
+                        Colors.white,
+                        Colors.white,
+                        Colors.transparent
+                      ],
+                      stops: const [0.0, 0.1, 0.9, 1.0],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.dstIn,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: suggestions!.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemBuilder: (context, index) {
+                      final suggestion = suggestions![index];
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: GestureDetector(
+                          onTap: () => onSubmit(suggestion),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
+                                  Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.05),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withOpacity(0.08)
+                                    : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Text(
+                              suggestion,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                              ),
+                            ),
                           ),
                         ),
-                        child: Text(
-                          suggestion,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 12),
