@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// Represents the different stages of the travel planning conversation
 enum TravelStage {
   welcome,
@@ -98,18 +96,91 @@ class ItineraryActivity {
   });
 }
 
-/// Represents a budget range for travel planning
+/// Represents a budget range with currency conversion
 class BudgetRange {
   final String label;
   final double min;
   final double max;
   final String currency;
-  
+  final Map<String, double>? exchangeRates;
+  final CostBreakdown? costBreakdown;
+
   const BudgetRange({
     required this.label,
     required this.min,
     required this.max,
     required this.currency,
+    this.exchangeRates,
+    this.costBreakdown,
+  });
+}
+
+/// Detailed breakdown of travel costs
+class CostBreakdown {
+  final double flights;
+  final double accommodation;
+  final double activities;
+  final double food;
+  final double transportation;
+  final double miscellaneous;
+  final String currency;
+  final Map<String, double>? exchangeRates;
+
+  const CostBreakdown({
+    required this.flights,
+    required this.accommodation,
+    required this.activities,
+    required this.food,
+    required this.transportation,
+    required this.miscellaneous,
+    required this.currency,
+    this.exchangeRates,
+  });
+
+  double get total => flights + accommodation + activities + food + transportation + miscellaneous;
+}
+
+/// Represents travel season information
+class TravelSeason {
+  final String name;
+  final String description;
+  final double averageTemperature;
+  final double averageRainfall;
+  final double crowdLevel;
+  final double priceLevel;
+  final List<String> pros;
+  final List<String> cons;
+
+  const TravelSeason({
+    required this.name,
+    required this.description,
+    required this.averageTemperature,
+    required this.averageRainfall,
+    required this.crowdLevel,
+    required this.priceLevel,
+    required this.pros,
+    required this.cons,
+  });
+}
+
+/// Represents required travel documents
+class TravelDocument {
+  final String name;
+  final String description;
+  final bool isRequired;
+  final String? validityPeriod;
+  final String? processingTime;
+  final String? applicationUrl;
+  final double? cost;
+
+  const TravelDocument({
+    required this.name,
+    required this.description,
+    required this.isRequired,
+    this.validityPeriod,
+    this.processingTime,
+    this.applicationUrl,
+    this.cost,
   });
 }
 

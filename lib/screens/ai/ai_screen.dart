@@ -9,6 +9,9 @@ import 'widgets/conversation_history.dart';
 import 'widgets/input_area.dart';
 import 'widgets/thinking_indicator.dart';
 import 'widgets/travel_recommendations_stage.dart';
+import 'widgets/budget_and_season_info.dart';
+import 'widgets/quick_form.dart';
+import 'widgets/planning_style_selector.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({Key? key}) : super(key: key);
@@ -50,6 +53,9 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   bool _tripBooked = false;
   Map<String, dynamic>? _bookingDetails;
 
+  // Add new state variable for planning style
+  bool? _useQuickForm;
+
   @override
   void initState() {
     super.initState();
@@ -80,21 +86,12 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
     super.dispose();
   }
   
-  void _processUserInput(String text) {
-    if (text.trim().isEmpty) return;
-    
-    final userInput = text.toLowerCase();
-    _textController.clear();
-    
-    // Add user message to conversation history
-    _addToConversationHistory(true, text);
-    
+  Future<void> _processUserInput(String userInput) async {
     setState(() {
-      _currentPrompt = text;
       _isThinking = true;
+      _addToConversationHistory(true, userInput);
     });
-    
-    // Simulate AI processing delay
+
     Future.delayed(const Duration(milliseconds: 1200), () {
       if (!mounted) return;
       
@@ -180,6 +177,8 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
                   "with a $budget budget, I can recommend some great options. Would you like to see them?",
                 );
               },
+              _selectedDestination,
+              'USD', // Default currency, should be configurable
             );
             break;
             
@@ -324,6 +323,9 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   void _handleQuickFormComplete(Map<String, dynamic> formData) {
     setState(() {
       _quickFormData = formData;
+      _formCompleted = true;
+      
+      // Initialize conversation with form data
       _selectedDestination = formData['destination'];
       _selectedBudget = BudgetRange(
         label: _getBudgetRangeLabel(formData['budget']),
@@ -357,6 +359,15 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
       
       // Skip to activity selection since we have all other info
       _currentStage = TravelStage.activitySelected;
+      
+      // Add initial message to conversation
+      _addToConversationHistory(
+        false,
+        "Thanks for sharing your preferences! I see you're planning a ${formData['tripType']} trip to ${formData['destination']} "
+        "for ${formData['duration']} days with ${formData['travelers']} travelers. "
+        "Your budget is around \$${formData['budget'].toStringAsFixed(0)}. "
+        "Let me help you plan the perfect trip!",
+      );
     });
   }
 
@@ -402,7 +413,6 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Unified smooth opacity gradient background
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -416,34 +426,31 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
             stops: const [0.0, 0.5, 1.0],
           ),
         ),
-        child: SafeArea( // Added SafeArea to handle status bar
+        child: SafeArea(
           child: Column(
             children: [
-              // AI Assistant Header with enhanced design
+              // AI Assistant Header
               Padding(
                 padding: EdgeInsets.fromLTRB(8, MediaQuery.of(context).padding.top + 8, 8, 0),
                 child: AssistantHeader(
-                  assistantMessage: _tripBooked 
-                      ? "Thank you for booking! Your trip details have been confirmed."
-                      : _tripData.isNotEmpty
-                          ? "Here are your travel recommendations based on your preferences!"
-                          : AiConversationService.getAssistantMessageForStage(
-                              _currentStage,
-                              _selectedInterest,
-                              _selectedDestination,
-                              _travelTime,
-                            ),
+                  assistantMessage: _useQuickForm == null
+                      ? "Welcome! Let's plan your perfect trip."
+                      : _useQuickForm!
+                          ? _formCompleted 
+                              ? "Great! I've got your preferences. Let me help you plan your trip to ${_quickFormData!['destination']}."
+                              : "Hi! Let's start by getting some basic information about your trip."
+                          : "Hi! I'm your travel planning assistant. Let's plan your perfect trip together!",
                   slideAnimation: AiAnimations.createHeaderSlideAnimation(_headerController),
                   fadeAnimation: AiAnimations.createFadeAnimation(_headerController),
                   showToggleButton: false,
                 ),
               ),
               
-              // Main content area with smooth transitions
+              // Main content area
               Expanded(
                 child: Stack(
                   children: [
-                    // Background gradient for visual appeal
+                    // Background gradient
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
@@ -461,7 +468,7 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
                       ),
                     ),
                     
-                    // Main content with smooth transitions
+                    // Main content
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 400),
                       child: _isThinking
@@ -485,64 +492,79 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
                             )
                           : Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                              child: _tripData.isNotEmpty || _tripBooked
-                                // For recommendations and booking screens
-                                ? FadeTransition(
-                                    opacity: _fadeController,
-                                    child: SlideTransition(
-                                      position: Tween<Offset>(
-                                        begin: const Offset(0, 0.1),
-                                        end: Offset.zero,
-                                      ).animate(CurvedAnimation(
-                                        parent: _slideController,
-                                        curve: Curves.easeOutCubic,
-                                      )),
-                                      child: _buildCurrentStage(),
+                              child: _useQuickForm == null
+                                ? Center(
+                                    child: SingleChildScrollView(
+                                      child: PlanningStyleSelector(
+                                        onStyleSelected: (useQuickForm) {
+                                          setState(() {
+                                            _useQuickForm = useQuickForm;
+                                            if (!useQuickForm) {
+                                              _formCompleted = true;
+                                              // Add initial message for conversational style
+                                              _addToConversationHistory(
+                                                false,
+                                                "Hi! I'm your travel planning assistant. Let's plan your perfect trip together! "
+                                                "What kind of travel experience are you looking for?",
+                                              );
+                                            }
+                                          });
+                                        },
+                                      ),
                                     ),
                                   )
-                                // For other conversation stages
-                                : SingleChildScrollView(
-                                    controller: _scrollController,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(height: 16),
-                                        
-                                        // Stage-specific content with enhanced animations
-                                        FadeTransition(
-                                          opacity: _fadeController,
-                                          child: SlideTransition(
-                                            position: Tween<Offset>(
-                                              begin: const Offset(0, 0.1),
-                                              end: Offset.zero,
-                                            ).animate(CurvedAnimation(
-                                              parent: _slideController,
-                                              curve: Curves.easeOutCubic,
-                                            )),
-                                            child: _buildCurrentStage(),
+                                : _formCompleted
+                                  ? SingleChildScrollView(
+                                      controller: _scrollController,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(height: 16),
+                                          
+                                          // Show quick form data summary if using quick form
+                                          if (_useQuickForm! && _quickFormData != null)
+                                            _buildQuickFormSummary(),
+                                          
+                                          const SizedBox(height: 24),
+                                          
+                                          // Stage-specific content
+                                          FadeTransition(
+                                            opacity: _fadeController,
+                                            child: SlideTransition(
+                                              position: Tween<Offset>(
+                                                begin: const Offset(0, 0.1),
+                                                end: Offset.zero,
+                                              ).animate(CurvedAnimation(
+                                                parent: _slideController,
+                                                curve: Curves.easeOutCubic,
+                                              )),
+                                              child: _buildCurrentStage(),
+                                            ),
                                           ),
-                                        ),
-                                        
-                                        const SizedBox(height: 24),
-                                        
-                                        // Enhanced conversation history
-                                        if (_showHistory)
-                                          ConversationHistoryWidget(
-                                            conversationHistory: _conversationHistory,
-                                          ),
-                                        
-                                        const SizedBox(height: 100), // Space for input area
-                                      ],
+                                          
+                                          const SizedBox(height: 24),
+                                          
+                                          // Conversation history
+                                          if (_showHistory)
+                                            ConversationHistoryWidget(
+                                              conversationHistory: _conversationHistory,
+                                            ),
+                                          
+                                          const SizedBox(height: 100),
+                                        ],
+                                      ),
+                                    )
+                                  : QuickForm(
+                                      onComplete: _handleQuickFormComplete,
                                     ),
-                                  ),
                             ),
                     ),
                   ],
                 ),
               ),
               
-              // Enhanced input area with backdrop blur and gradient
-              if (!_formCompleted)
+              // Input area (only show after form completion)
+              if (_formCompleted)
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -828,75 +850,63 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
         );
 
       case TravelStage.budgetSelected:
-        // After a short delay, transition to recommendations
-        Future.delayed(const Duration(milliseconds: 1500), () {
-          if (mounted) {
-            setState(() {
-              _tripData = {
-                'destination': _selectedDestination,
-                'travelTime': _travelTime,
-                'budget': _selectedBudget?.label ?? 'Mid-range',
-                'activities': _recommendations,
-                'itinerary': AiConversationService.generateSampleItinerary(_selectedInterest),
-              };
-            });
-          }
-        });
+        final season = AiConversationService.getTravelSeason(_selectedDestination, _travelTime);
+        final documents = AiConversationService.getRequiredDocuments(_selectedDestination, 'US'); // TODO: Get actual nationality
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Perfect!",
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.9),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Based on your preferences for $_selectedDestination, visiting during $_travelTime, "
-              "with a ${_selectedBudget?.label} budget, I can recommend some great options.",
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Show loading indicator with enhanced styling
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                      Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.1),
-                    ],
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Perfect!",
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.9),
                   ),
-                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                const SizedBox(height: 8),
+                Text(
+                  "Based on your preferences for $_selectedDestination, visiting during $_travelTime, "
+                  "with a ${_selectedBudget?.label} budget, here's your detailed plan:",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                BudgetAndSeasonInfo(
+                  budgetRange: _selectedBudget!,
+                  season: season,
+                  documents: documents,
+                ),
+                const SizedBox(height: 24),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _currentStage = TravelStage.complete;
+                        _tripData = {
+                          'destination': _selectedDestination,
+                          'travelTime': _travelTime,
+                          'budget': _selectedBudget,
+                          'season': season,
+                          'documents': documents,
+                        };
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Generating your personalized recommendations...",
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
-                      ),
-                    ),
-                  ],
+                    child: const Text('Continue to Recommendations'),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         );
 
       case TravelStage.complete:
@@ -1485,6 +1495,103 @@ class _AiPageState extends State<AiPage> with TickerProviderStateMixin {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildQuickFormSummary() {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withOpacity(0.2),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Your Trip Preferences',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildSummaryItem(
+              'Destination',
+              _quickFormData!['destination'],
+              Icons.location_on,
+            ),
+            _buildSummaryItem(
+              'Trip Type',
+              _quickFormData!['tripType'].toString().toUpperCase(),
+              Icons.flight,
+            ),
+            _buildSummaryItem(
+              'Duration',
+              '${_quickFormData!['duration']} days',
+              Icons.calendar_today,
+            ),
+            _buildSummaryItem(
+              'Travelers',
+              '${_quickFormData!['travelers']} people',
+              Icons.people,
+            ),
+            _buildSummaryItem(
+              'Budget',
+              '\$${_quickFormData!['budget'].toStringAsFixed(0)}',
+              Icons.attach_money,
+            ),
+            if (_quickFormData!['interests'].isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Interests',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: (_quickFormData!['interests'] as List<String>).map((interest) {
+                  return Chip(
+                    label: Text(interest),
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  );
+                }).toList(),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem(String label, String value, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 20,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '$label:',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ],
       ),
     );
   }

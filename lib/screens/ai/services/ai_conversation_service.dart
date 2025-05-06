@@ -80,18 +80,97 @@ class AiConversationService {
     return TravelStage.activitySelected;
   }
 
-  /// Process user input for budget selection
-  static TravelStage processBudgetSelection(String input, void Function(BudgetRange) setBudgetRange) {
+  /// Process user input for budget selection with enhanced cost breakdown
+  static TravelStage processBudgetSelection(
+    String input, 
+    void Function(BudgetRange) setBudgetRange,
+    String destination,
+    String currency,
+  ) {
+    BudgetRange budgetRange;
+    Map<String, double> exchangeRates = {
+      'USD': 1.0,
+      'EUR': 0.85,
+      'GBP': 0.73,
+      'JPY': 110.0,
+      // Add more currencies as needed
+    };
+
     if (input.contains('budget') || input.contains('cheap') || input.contains('affordable')) {
-      setBudgetRange(budgetRanges[0]);
+      budgetRange = BudgetRange(
+        label: 'Budget',
+        min: 500,
+        max: 1500,
+        currency: currency,
+        exchangeRates: exchangeRates,
+        costBreakdown: CostBreakdown(
+          flights: 300,
+          accommodation: 400,
+          activities: 200,
+          food: 300,
+          transportation: 150,
+          miscellaneous: 150,
+          currency: currency,
+          exchangeRates: exchangeRates,
+        ),
+      );
     } else if (input.contains('mid') || input.contains('moderate') || input.contains('average')) {
-      setBudgetRange(budgetRanges[1]);
+      budgetRange = BudgetRange(
+        label: 'Mid-range',
+        min: 1500,
+        max: 3000,
+        currency: currency,
+        exchangeRates: exchangeRates,
+        costBreakdown: CostBreakdown(
+          flights: 600,
+          accommodation: 800,
+          activities: 400,
+          food: 600,
+          transportation: 300,
+          miscellaneous: 300,
+          currency: currency,
+          exchangeRates: exchangeRates,
+        ),
+      );
     } else if (input.contains('luxury') || input.contains('premium') || input.contains('high')) {
-      setBudgetRange(budgetRanges[2]);
+      budgetRange = BudgetRange(
+        label: 'Luxury',
+        min: 3000,
+        max: 10000,
+        currency: currency,
+        exchangeRates: exchangeRates,
+        costBreakdown: CostBreakdown(
+          flights: 1200,
+          accommodation: 1600,
+          activities: 800,
+          food: 1200,
+          transportation: 600,
+          miscellaneous: 600,
+          currency: currency,
+          exchangeRates: exchangeRates,
+        ),
+      );
     } else {
-      setBudgetRange(budgetRanges[1]); // Default to mid-range
+      budgetRange = BudgetRange(
+        label: 'Mid-range',
+        min: 1500,
+        max: 3000,
+        currency: currency,
+        exchangeRates: exchangeRates,
+        costBreakdown: CostBreakdown(
+          flights: 600,
+          accommodation: 800,
+          activities: 400,
+          food: 600,
+          transportation: 300,
+          miscellaneous: 300,
+          currency: currency,
+          exchangeRates: exchangeRates,
+        ),
+      );
     }
     
+    setBudgetRange(budgetRange);
     return TravelStage.budgetSelected;
   }
 
@@ -433,5 +512,102 @@ class AiConversationService {
   
   static String _generateVisaResponse(String destination) {
     return "Visa requirements for $destination depend on your nationality and the length of your stay. Generally, you'll need a passport valid for at least six months beyond your stay. When you book your trip, we'll provide specific visa information based on your citizenship. It's always a good idea to check your government's travel website for the most up-to-date requirements, as these can change.";
+  }
+
+  /// Get travel season information for a destination
+  static TravelSeason getTravelSeason(String destination, String time) {
+    // This would typically come from a weather API or database
+    // For now, using sample data
+    if (time.contains('summer') || time.contains('july') || time.contains('august')) {
+      return TravelSeason(
+        name: 'Summer',
+        description: 'Warm and sunny weather, perfect for outdoor activities',
+        averageTemperature: 28.0,
+        averageRainfall: 50.0,
+        crowdLevel: 0.8,
+        priceLevel: 0.9,
+        pros: [
+          'Best weather for outdoor activities',
+          'Longer daylight hours',
+          'Many festivals and events',
+        ],
+        cons: [
+          'Higher prices',
+          'More crowded',
+          'Need to book in advance',
+        ],
+      );
+    } else if (time.contains('winter') || time.contains('december') || time.contains('january')) {
+      return TravelSeason(
+        name: 'Winter',
+        description: 'Cold weather, perfect for winter sports and indoor activities',
+        averageTemperature: 5.0,
+        averageRainfall: 80.0,
+        crowdLevel: 0.6,
+        priceLevel: 0.7,
+        pros: [
+          'Lower prices',
+          'Less crowded',
+          'Winter sports available',
+        ],
+        cons: [
+          'Cold weather',
+          'Shorter daylight hours',
+          'Some attractions closed',
+        ],
+      );
+    } else {
+      return TravelSeason(
+        name: 'Shoulder Season',
+        description: 'Mild weather, good balance of crowds and prices',
+        averageTemperature: 18.0,
+        averageRainfall: 60.0,
+        crowdLevel: 0.5,
+        priceLevel: 0.6,
+        pros: [
+          'Moderate prices',
+          'Comfortable weather',
+          'Good availability',
+        ],
+        cons: [
+          'Unpredictable weather',
+          'Some seasonal activities unavailable',
+          'May need to check opening hours',
+        ],
+      );
+    }
+  }
+
+  /// Get required travel documents for a destination
+  static List<TravelDocument> getRequiredDocuments(String destination, String nationality) {
+    // This would typically come from a visa/documents database
+    // For now, using sample data
+    return [
+      TravelDocument(
+        name: 'Passport',
+        description: 'Valid passport with at least 6 months validity',
+        isRequired: true,
+        validityPeriod: '6 months beyond stay',
+        processingTime: '2-4 weeks',
+        cost: 145.0,
+      ),
+      TravelDocument(
+        name: 'Visa',
+        description: 'Tourist visa for entry',
+        isRequired: true,
+        validityPeriod: '90 days',
+        processingTime: '5-10 business days',
+        cost: 160.0,
+        applicationUrl: 'https://visa.example.com',
+      ),
+      TravelDocument(
+        name: 'Travel Insurance',
+        description: 'Comprehensive travel insurance covering medical and trip cancellation',
+        isRequired: false,
+        validityPeriod: 'Duration of trip',
+        processingTime: 'Immediate',
+        cost: 50.0,
+      ),
+    ];
   }
 }

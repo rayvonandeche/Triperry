@@ -41,8 +41,8 @@ void showAddTripForm(BuildContext context) {
                 const SizedBox(height: 16),
                 
                 // Trip name input
-                TextField(
-                  decoration: const InputDecoration(
+                const TextField(
+                  decoration: InputDecoration(
                     labelText: 'Trip Name',
                     hintText: 'e.g., Summer Adventure 2025',
                     border: OutlineInputBorder(),
@@ -51,8 +51,8 @@ void showAddTripForm(BuildContext context) {
                 const SizedBox(height: 16),
                 
                 // Destination input
-                TextField(
-                  decoration: const InputDecoration(
+                const TextField(
+                  decoration: InputDecoration(
                     labelText: 'Destination',
                     hintText: 'Where are you going?',
                     border: OutlineInputBorder(),
@@ -74,7 +74,7 @@ void showAddTripForm(BuildContext context) {
                         ),
                         readOnly: true,
                         onTap: () async {
-                          final pickedDate = await showDatePicker(
+                          await showDatePicker(
                             context: context,
                             initialDate: DateTime.now(),
                             firstDate: DateTime.now(),
@@ -95,7 +95,7 @@ void showAddTripForm(BuildContext context) {
                         ),
                         readOnly: true,
                         onTap: () async {
-                          final pickedDate = await showDatePicker(
+                          await showDatePicker(
                             context: context,
                             initialDate: DateTime.now().add(const Duration(days: 7)),
                             firstDate: DateTime.now(),

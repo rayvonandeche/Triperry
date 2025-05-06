@@ -1,7 +1,4 @@
-import 'dart:convert';
-import 'dart:math';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
 
 class Destination {
   final String name;
@@ -932,7 +929,7 @@ class TravelDataService {
       
       return basePrompt;
     } catch (e) {
-      print('Error augmenting prompt with data: $e');
+      debugPrint('Error augmenting prompt with data: $e');
       // Return the original prompt if there's an error
       return basePrompt;
     }

@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:triperry/providers/app_provider.dart';
 import 'package:triperry/screens/ai/ai_screen.dart';
 import 'package:triperry/screens/buddies/buddies_screen.dart';
 import 'package:triperry/screens/discover/discover_screen.dart';
@@ -7,7 +6,6 @@ import 'package:triperry/screens/profile/profile_screen.dart';
 import 'package:triperry/screens/trips/trips_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:triperry/theme/app_theme.dart';
 
