@@ -15,6 +15,7 @@ import 'widgets/planning_style_selector.dart';
 import 'models/destination_data.dart';
 import 'widgets/destination_card.dart';
 import '../../services/destination_service.dart';
+import 'widgets/travel_journey_visualization.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({Key? key}) : super(key: key);

@@ -30,7 +30,7 @@ class _TripQueryIntakeStageState extends State<TripQueryIntakeStage> {
     {
       'question': 'Hi there! I\'m your travel assistant. Where would you like to go?',
       'field': 'destination',
-      'suggestions': ['Paris', 'Tokyo', 'New York', 'Bali', 'Safari', 'Beach getaway'],
+      'suggestions': ['Nairobi', 'Mombasa', 'Maasai Mara', 'Lamu', 'Amboseli', 'Kisumu'],
       'inputType': 'text'
     },
     {

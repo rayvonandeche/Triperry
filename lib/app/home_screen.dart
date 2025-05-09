@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:triperry/theme/app_theme.dart';
+import 'package:provider/provider.dart';
+import 'package:triperry/services/auth_service.dart';
 
 part './drawer.dart';
 
@@ -30,6 +32,15 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
+    
+    // Check if user is logged in
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      if (!authService.isLoggedIn) {
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
+    });
+    
     _containerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -307,9 +318,9 @@ class _HomeScreenState extends State<HomeScreen>
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         drawer: _buildDrawer(
           context: context,
-          currentIndexx: _selectedIndex,
+          currentIndex: _selectedIndex,
           showAI: showAI,
-          onButtonPressedd: _onButtonPressed,
+          onButtonPressed: _onButtonPressed,
           setState: setState,
         ),
       ),
@@ -386,6 +397,129 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDrawer({
+    required BuildContext context,
+    required int currentIndex,
+    required bool showAI,
+    required Function() onButtonPressed,
+    required void Function(void Function()) setState}) {
+    
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.currentUser;
+    final String userInitial = user?.name != null && user!.name.isNotEmpty ? 
+                              user.name.substring(0, 1) : 'G';
+    
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          UserAccountsDrawerHeader(
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor,
+            ),
+            accountName: Text(
+              user?.name ?? 'Guest User',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            accountEmail: Text(user?.email ?? ''),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Text(
+                userInitial,
+                style: TextStyle(
+                  fontSize: 24,
+                  color: AppTheme.primaryColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          
+          ListTile(
+            leading: const Icon(Icons.explore_rounded),
+            title: const Text('Discover'),
+            selected: currentIndex == 0 && !showAI,
+            onTap: () {
+              setState(() => _selectedIndex = 0);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.group_rounded),
+            title: const Text('Buddies'),
+            selected: currentIndex == 1 && !showAI,
+            onTap: () {
+              setState(() => _selectedIndex = 1);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.flight_rounded),
+            title: const Text('My Trips'),
+            selected: currentIndex == 2 && !showAI,
+            onTap: () {
+              setState(() => _selectedIndex = 2);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.person_rounded),
+            title: const Text('Profile'),
+            selected: currentIndex == 3 && !showAI,
+            onTap: () {
+              setState(() => _selectedIndex = 3);
+              Navigator.pop(context);
+            },
+          ),
+          
+          const Divider(),
+          
+          ListTile(
+            leading: const Icon(Icons.auto_awesome),
+            title: const Text('AI Assistant'),
+            selected: showAI,
+            onTap: () {
+              onButtonPressed();
+              Navigator.pop(context);
+            },
+          ),
+          
+          const Divider(),
+          
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
+            onTap: () {
+              Navigator.pop(context);
+              // Navigate to settings
+            },
+          ),
+          
+          ListTile(
+            leading: const Icon(Icons.help_outline),
+            title: const Text('Help & Support'),
+            onTap: () {
+              Navigator.pop(context);
+              // Navigate to help
+            },
+          ),
+          
+          const Divider(),
+          
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
+            onTap: () async {
+              await authService.logout();
+              if (!context.mounted) return;
+              Navigator.of(context).pushReplacementNamed('/login');
+            },
+          ),
+        ],
       ),
     );
   }

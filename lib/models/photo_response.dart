@@ -9,6 +9,7 @@ class PhotoResponse {
   final String avgColor;
   final PhotoSrc src;
   final String alt;
+  Map<String, dynamic>? additionalInfo; // Added for category-specific data
 
   PhotoResponse({
     required this.id,
@@ -21,6 +22,7 @@ class PhotoResponse {
     required this.avgColor,
     required this.src,
     required this.alt,
+    this.additionalInfo,
   });
 
   factory PhotoResponse.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class PhotoResponse {
       avgColor: json['avg_color'],
       src: PhotoSrc.fromJson(json['src']),
       alt: json['alt'] ?? "Beautiful scenery",
+      additionalInfo: json['additionalInfo'],
     );
   }
 }

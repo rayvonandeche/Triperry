@@ -5,545 +5,470 @@
 // class DemoDataService {
 //   // Popular destinations with pre-built information
 //   static final Map<String, Map<String, dynamic>> _destinationData = {
-//     'paris': {
-//       'name': 'Paris, France',
-//       'description': 'Known as the "City of Light," Paris is famous for its iconic landmarks, world-class museums, and romantic ambiance. The city combines historic architecture with modern cultural attractions and is renowned for its cuisine and fashion scene.',
-//       'bestTimeToVisit': 'April to June or September to October for mild weather and fewer tourists',
-//       'language': 'French',
-//       'currency': 'Euro (€)',
+//     'nairobi': {
+//       'name': 'Nairobi, Kenya',
+//       'description': 'Nairobi is Kenya\'s capital city. In addition to its urban core, the city has Nairobi National Park, a large game reserve known for breeding endangered black rhinos and home to giraffes, zebras and lions.',
+//       'bestTimeToVisit': 'June to October (Dry Season) or January to February (Hot, Dry)',
+//       'language': 'Swahili, English',
+//       'currency': 'Kenyan Shilling (KES)',
 //       'attractions': [
 //         {
-//           'name': 'Eiffel Tower',
-//           'shortDescription': 'Iconic 19th-century tower with panoramic city views',
-//           'imageQuery': 'Paris Eiffel Tower landmark',
-//           'rating': 4.8
-//         },
-//         {
-//           'name': 'Louvre Museum',
-//           'shortDescription': 'World\'s largest art museum, home to the Mona Lisa',
-//           'imageQuery': 'Paris Louvre Museum Mona Lisa',
-//           'rating': 4.7
-//         },
-//         {
-//           'name': 'Notre-Dame Cathedral',
-//           'shortDescription': 'Medieval Catholic cathedral with Gothic architecture',
-//           'imageQuery': 'Paris Notre Dame Cathedral Gothic',
+//           'name': 'Nairobi National Park',
+//           'shortDescription': 'Wildlife park on the outskirts of the city',
+//           'imageQuery': 'Nairobi National Park animals',
 //           'rating': 4.6
 //         },
 //         {
-//           'name': 'Montmartre',
-//           'shortDescription': 'Bohemian hillside area with Sacré-Cœur Basilica',
-//           'imageQuery': 'Paris Montmartre Sacre Coeur',
+//           'name': 'David Sheldrick Wildlife Trust',
+//           'shortDescription': 'Elephant orphanage and rehabilitation center',
+//           'imageQuery': 'David Sheldrick elephants Nairobi',
+//           'rating': 4.8
+//         },
+//         {
+//           'name': 'Giraffe Centre',
+//           'shortDescription': 'Conservation center for Rothschild giraffes',
+//           'imageQuery': 'Giraffe Centre Nairobi Kenya',
+//           'rating': 4.7
+//         },
+//         {
+//           'name': 'Karen Blixen Museum',
+//           'shortDescription': 'Former home of the "Out of Africa" author',
+//           'imageQuery': 'Karen Blixen Museum Nairobi',
 //           'rating': 4.5
 //         },
 //         {
-//           'name': 'Champs-Élysées',
-//           'shortDescription': 'Famous avenue known for luxury shops and theaters',
-//           'imageQuery': 'Paris Champs Elysees shopping avenue',
+//           'name': 'Bomas of Kenya',
+//           'shortDescription': 'Cultural center showcasing traditional Kenyan villages and dances',
+//           'imageQuery': 'Bomas of Kenya cultural dance',
 //           'rating': 4.4
 //         }
 //       ],
 //       'weather': [
-//         {'date': '2025-04-21', 'condition': 'Partly cloudy', 'tempC': 18, 'tempF': 64},
-//         {'date': '2025-04-22', 'condition': 'Sunny', 'tempC': 20, 'tempF': 68},
-//         {'date': '2025-04-23', 'condition': 'Light rain', 'tempC': 16, 'tempF': 61},
-//         {'date': '2025-04-24', 'condition': 'Overcast', 'tempC': 15, 'tempF': 59},
-//         {'date': '2025-04-25', 'condition': 'Sunny', 'tempC': 19, 'tempF': 66},
-//         {'date': '2025-04-26', 'condition': 'Clear', 'tempC': 21, 'tempF': 70},
-//         {'date': '2025-04-27', 'condition': 'Partly cloudy', 'tempC': 18, 'tempF': 64},
+//         {'date': '2025-07-15', 'condition': 'Sunny', 'tempC': 22, 'tempF': 72},
+//         {'date': '2025-07-16', 'condition': 'Partly cloudy', 'tempC': 21, 'tempF': 70},
+//         {'date': '2025-07-17', 'condition': 'Clear', 'tempC': 23, 'tempF': 73},
+//         {'date': '2025-01-20', 'condition': 'Hot and Sunny', 'tempC': 28, 'tempF': 82},
+//         {'date': '2025-01-21', 'condition': 'Clear', 'tempC': 29, 'tempF': 84},
 //       ]
 //     },
-//     'tokyo': {
-//       'name': 'Tokyo, Japan',
-//       'description': 'Tokyo is a dynamic metropolis that blends ultramodern and traditional elements. The city offers cutting-edge technology, world-renowned cuisine, ancient temples, and vibrant shopping districts, all connected by an efficient public transportation system.',
-//       'bestTimeToVisit': 'March to May for cherry blossoms or October to November for autumn colors',
-//       'language': 'Japanese',
-//       'currency': 'Japanese Yen (¥)',
+//     'mombasa': {
+//       'name': 'Mombasa, Kenya',
+//       'description': 'Mombasa is a coastal city in southeastern Kenya along the Indian Ocean. It has a rich history and is known for its beautiful beaches, coral reefs, and Swahili culture.',
+//       'bestTimeToVisit': 'June to October (Cool and Dry) or January to March (Hot and Humid)',
+//       'language': 'Swahili, English',
+//       'currency': 'Kenyan Shilling (KES)',
 //       'attractions': [
 //         {
-//           'name': 'Tokyo Skytree',
-//           'shortDescription': 'Tallest tower in Japan with observation decks',
-//           'imageQuery': 'Tokyo Skytree tower Japan',
-//           'rating': 4.6
-//         },
-//         {
-//           'name': 'Shibuya Crossing',
-//           'shortDescription': 'Famous bustling intersection known for scramble crossing',
-//           'imageQuery': 'Tokyo Shibuya Crossing busy intersection',
+//           'name': 'Fort Jesus',
+//           'shortDescription': '16th-century Portuguese fort, a UNESCO World Heritage site',
+//           'imageQuery': 'Fort Jesus Mombasa Kenya',
 //           'rating': 4.5
 //         },
 //         {
-//           'name': 'Senso-ji Temple',
-//           'shortDescription': 'Ancient Buddhist temple in Asakusa',
-//           'imageQuery': 'Tokyo Senso-ji Temple Asakusa',
-//           'rating': 4.7
-//         },
-//         {
-//           'name': 'Meiji Shrine',
-//           'shortDescription': 'Shinto shrine dedicated to Emperor Meiji and Empress Shoken',
-//           'imageQuery': 'Tokyo Meiji Shrine peaceful',
-//           'rating': 4.6
-//         },
-//         {
-//           'name': 'Tsukiji Outer Market',
-//           'shortDescription': 'Historic food market with fresh seafood and local cuisine',
-//           'imageQuery': 'Tokyo Tsukiji Market food seafood',
-//           'rating': 4.5
-//         }
-//       ],
-//       'weather': [
-//         {'date': '2025-04-21', 'condition': 'Clear', 'tempC': 22, 'tempF': 72},
-//         {'date': '2025-04-22', 'condition': 'Partly cloudy', 'tempC': 23, 'tempF': 73},
-//         {'date': '2025-04-23', 'condition': 'Rain shower', 'tempC': 19, 'tempF': 66},
-//         {'date': '2025-04-24', 'condition': 'Rain', 'tempC': 18, 'tempF': 64},
-//         {'date': '2025-04-25', 'condition': 'Overcast', 'tempC': 20, 'tempF': 68},
-//         {'date': '2025-04-26', 'condition': 'Sunny', 'tempC': 24, 'tempF': 75},
-//         {'date': '2025-04-27', 'condition': 'Clear', 'tempC': 25, 'tempF': 77},
-//       ]
-//     },
-//     'new york': {
-//       'name': 'New York City, USA',
-//       'description': 'New York City is a global hub for culture, finance, media, and entertainment. The city features iconic skyscrapers, diverse neighborhoods, world-class museums, Broadway theaters, and an energetic atmosphere that never sleeps.',
-//       'bestTimeToVisit': 'April to June or September to early November for pleasant weather',
-//       'language': 'English',
-//       'currency': 'US Dollar ($)',
-//       'attractions': [
-//         {
-//           'name': 'Empire State Building',
-//           'shortDescription': 'Iconic 102-story skyscraper with observation deck',
-//           'imageQuery': 'New York Empire State Building skyline',
-//           'rating': 4.7
-//         },
-//         {
-//           'name': 'Central Park',
-//           'shortDescription': 'Sprawling urban park with walking paths and lakes',
-//           'imageQuery': 'New York Central Park nature urban',
+//           'name': 'Diani Beach',
+//           'shortDescription': 'Popular beach destination south of Mombasa',
+//           'imageQuery': 'Diani Beach Kenya white sand',
 //           'rating': 4.8
 //         },
 //         {
-//           'name': 'Statue of Liberty',
-//           'shortDescription': 'Iconic copper statue symbolizing freedom',
-//           'imageQuery': 'New York Statue of Liberty harbor',
-//           'rating': 4.7
-//         },
-//         {
-//           'name': 'Times Square',
-//           'shortDescription': 'Famous intersection known for bright lights and billboards',
-//           'imageQuery': 'New York Times Square lights night',
-//           'rating': 4.5
-//         },
-//         {
-//           'name': 'The Metropolitan Museum of Art',
-//           'shortDescription': 'One of the world\'s largest and finest art museums',
-//           'imageQuery': 'New York Metropolitan Museum Art Met',
-//           'rating': 4.8
-//         }
-//       ],
-//       'weather': [
-//         {'date': '2025-04-21', 'condition': 'Sunny', 'tempC': 16, 'tempF': 61},
-//         {'date': '2025-04-22', 'condition': 'Partly cloudy', 'tempC': 18, 'tempF': 64},
-//         {'date': '2025-04-23', 'condition': 'Clear', 'tempC': 19, 'tempF': 66},
-//         {'date': '2025-04-24', 'condition': 'Overcast', 'tempC': 15, 'tempF': 59},
-//         {'date': '2025-04-25', 'condition': 'Rain showers', 'tempC': 13, 'tempF': 55},
-//         {'date': '2025-04-26', 'condition': 'Cloudy', 'tempC': 14, 'tempF': 57},
-//         {'date': '2025-04-27', 'condition': 'Sunny', 'tempC': 17, 'tempF': 63},
-//       ]
-//     },
-//     'bali': {
-//       'name': 'Bali, Indonesia',
-//       'description': 'Bali is a tropical paradise known for its lush landscapes, beautiful beaches, rich cultural heritage, and spiritual ambiance. The island offers everything from relaxing beach resorts to adventurous jungle treks, vibrant nightlife, and ancient temples.',
-//       'bestTimeToVisit': 'April to October for dry season with sunny days',
-//       'language': 'Indonesian (Bahasa Indonesia) and Balinese',
-//       'currency': 'Indonesian Rupiah (Rp)',
-//       'attractions': [
-//         {
-//           'name': 'Tanah Lot Temple',
-//           'shortDescription': 'Ancient sea temple perched on a rock formation',
-//           'imageQuery': 'Bali Tanah Lot Temple sunset',
+//           'name': 'Haller Park',
+//           'shortDescription': 'Rehabilitated quarry now a nature park with animals',
+//           'imageQuery': 'Haller Park Mombasa animals',
 //           'rating': 4.6
 //         },
 //         {
-//           'name': 'Ubud Monkey Forest',
-//           'shortDescription': 'Natural sanctuary with Balinese long-tailed macaques',
-//           'imageQuery': 'Bali Ubud Monkey Forest sanctuary',
+//           'name': 'Mombasa Old Town',
+//           'shortDescription': 'Historic area with narrow streets and Swahili architecture',
+//           'imageQuery': 'Mombasa Old Town architecture',
 //           'rating': 4.4
 //         },
 //         {
-//           'name': 'Tegallalang Rice Terraces',
-//           'shortDescription': 'Stunning stepped rice paddies in central Bali',
-//           'imageQuery': 'Bali Tegallalang Rice Terraces green',
-//           'rating': 4.5
-//         },
-//         {
-//           'name': 'Uluwatu Temple',
-//           'shortDescription': 'Clifftop temple with traditional Kecak dance performances',
-//           'imageQuery': 'Bali Uluwatu Temple cliff ocean',
+//           'name': 'Mombasa Marine National Park',
+//           'shortDescription': 'Marine reserve with coral reefs and diverse sea life',
+//           'imageQuery': 'Mombasa Marine Park snorkeling',
 //           'rating': 4.7
-//         },
-//         {
-//           'name': 'Seminyak Beach',
-//           'shortDescription': 'Upscale beach area with luxury resorts and dining',
-//           'imageQuery': 'Bali Seminyak Beach sunset relaxation',
-//           'rating': 4.5
 //         }
 //       ],
 //       'weather': [
-//         {'date': '2025-04-21', 'condition': 'Sunny', 'tempC': 30, 'tempF': 86},
-//         {'date': '2025-04-22', 'condition': 'Partly cloudy', 'tempC': 31, 'tempF': 88},
-//         {'date': '2025-04-23', 'condition': 'Isolated thunderstorms', 'tempC': 29, 'tempF': 84},
-//         {'date': '2025-04-24', 'condition': 'Scattered showers', 'tempC': 28, 'tempF': 82},
-//         {'date': '2025-04-25', 'condition': 'Sunny', 'tempC': 30, 'tempF': 86},
-//         {'date': '2025-04-26', 'condition': 'Clear', 'tempC': 31, 'tempF': 88},
-//         {'date': '2025-04-27', 'condition': 'Partly cloudy', 'tempC': 30, 'tempF': 86},
+//         {'date': '2025-08-10', 'condition': 'Sunny intervals', 'tempC': 27, 'tempF': 81},
+//         {'date': '2025-08-11', 'condition': 'Breezy', 'tempC': 26, 'tempF': 79},
+//         {'date': '2025-02-15', 'condition': 'Hot and Sunny', 'tempC': 32, 'tempF': 90},
 //       ]
 //     },
-//     'sydney': {
-//       'name': 'Sydney, Australia',
-//       'description': 'Sydney is a vibrant coastal city known for its iconic harbour, stunning beaches, and modern skyline. The city offers a perfect blend of outdoor activities, cultural attractions, and cosmopolitan dining and entertainment experiences.',
-//       'bestTimeToVisit': 'September to November or March to May for mild temperatures and fewer crowds',
-//       'language': 'English',
-//       'currency': 'Australian Dollar (A$)',
+//     'maasai-mara': {
+//       'name': 'Maasai Mara National Reserve, Kenya',
+//       'description': 'One of Africa\'s greatest wildlife reserves, famous for the Great Migration of wildebeest and other animals. It offers incredible safari experiences.',
+//       'bestTimeToVisit': 'July to October (Great Migration) or January to March (Dry Season)',
+//       'language': 'Maa, Swahili, English',
+//       'currency': 'Kenyan Shilling (KES)',
 //       'attractions': [
 //         {
-//           'name': 'Sydney Opera House',
-//           'shortDescription': 'World-famous performing arts center with distinctive sail design',
-//           'imageQuery': 'Sydney Opera House harbour iconic',
+//           'name': 'Great Wildebeest Migration',
+//           'shortDescription': 'Annual migration of millions of wildebeest, zebras, and gazelles',
+//           'imageQuery': 'Maasai Mara Great Migration river crossing',
+//           'rating': 5.0
+//         },
+//         {
+//           'name': 'Hot Air Balloon Safari',
+//           'shortDescription': 'Scenic balloon rides over the Mara plains at sunrise',
+//           'imageQuery': 'Maasai Mara hot air balloon safari',
+//           'rating': 4.9
+//         },
+//         {
+//           'name': 'Maasai Village Visit',
+//           'shortDescription': 'Cultural experience visiting a traditional Maasai village',
+//           'imageQuery': 'Maasai village Kenya culture',
+//           'rating': 4.6
+//         },
+//         {
+//           'name': 'Big Five Sighting',
+//           'shortDescription': 'Opportunity to see lions, leopards, elephants, rhinos, and buffalo',
+//           'imageQuery': 'Maasai Mara Big Five safari',
+//           'rating': 4.8
+//         }
+//       ],
+//       'weather': [
+//         {'date': '2025-09-05', 'condition': 'Sunny with cool mornings', 'tempC': 24, 'tempF': 75},
+//         {'date': '2025-09-06', 'condition': 'Clear skies', 'tempC': 25, 'tempF': 77},
+//         {'date': '2025-02-10', 'condition': 'Warm and dry', 'tempC': 29, 'tempF': 84},
+//       ]
+//     },
+//      'amboseli': {
+//       'name': 'Amboseli National Park, Kenya',
+//       'description': 'Known for its large elephant herds and views of immense Mount Kilimanjaro, across the border in Tanzania. Observation Hill offers panoramas of the peak and the park’s plains and swamps.',
+//       'bestTimeToVisit': 'June to October (Dry season) or January to February',
+//       'language': 'Maa, Swahili, English',
+//       'currency': 'Kenyan Shilling (KES)',
+//       'attractions': [
+//         {
+//           'name': 'View of Mount Kilimanjaro',
+//           'shortDescription': 'Iconic views of Africa\'s highest peak',
+//           'imageQuery': 'Amboseli Mount Kilimanjaro view elephants',
+//           'rating': 4.9
+//         },
+//         {
+//           'name': 'Large Elephant Herds',
+//           'shortDescription': 'Famous for its significant population of African elephants',
+//           'imageQuery': 'Amboseli elephant herds Kenya',
 //           'rating': 4.8
 //         },
 //         {
-//           'name': 'Sydney Harbour Bridge',
-//           'shortDescription': 'Iconic steel arch bridge nicknamed "The Coathanger"',
-//           'imageQuery': 'Sydney Harbour Bridge landmark',
+//           'name': 'Observation Hill',
+//           'shortDescription': 'Panoramic views of the park, swamps, and Kilimanjaro',
+//           'imageQuery': 'Amboseli Observation Hill view',
 //           'rating': 4.7
 //         },
 //         {
-//           'name': 'Bondi Beach',
-//           'shortDescription': 'Famous crescent-shaped beach with golden sand',
-//           'imageQuery': 'Sydney Bondi Beach waves sand',
-//           'rating': 4.6
-//         },
-//         {
-//           'name': 'Royal Botanic Garden',
-//           'shortDescription': 'Historic botanical garden with harbor views',
-//           'imageQuery': 'Sydney Royal Botanic Garden flowers',
-//           'rating': 4.6
-//         },
-//         {
-//           'name': 'Taronga Zoo',
-//           'shortDescription': 'Zoo with Australian wildlife and panoramic city views',
-//           'imageQuery': 'Sydney Taronga Zoo animals wildlife',
+//           'name': 'Bird Watching',
+//           'shortDescription': 'Rich birdlife with over 400 species, including pelicans and flamingos in swamp areas',
+//           'imageQuery': 'Amboseli bird watching flamingos',
 //           'rating': 4.5
 //         }
 //       ],
 //       'weather': [
-//         {'date': '2025-04-21', 'condition': 'Sunny', 'tempC': 22, 'tempF': 72},
-//         {'date': '2025-04-22', 'condition': 'Partly cloudy', 'tempC': 23, 'tempF': 73},
-//         {'date': '2025-04-23', 'condition': 'Mostly sunny', 'tempC': 24, 'tempF': 75},
-//         {'date': '2025-04-24', 'condition': 'Showers', 'tempC': 21, 'tempF': 70},
-//         {'date': '2025-04-25', 'condition': 'Rain', 'tempC': 19, 'tempF': 66},
-//         {'date': '2025-04-26', 'condition': 'Partly cloudy', 'tempC': 20, 'tempF': 68},
-//         {'date': '2025-04-27', 'condition': 'Sunny', 'tempC': 22, 'tempF': 72},
-//       ]
-//     }
-//   };
-
-//   // Activity suggestions by category and location
-//   static final Map<String, Map<String, List<Map<String, dynamic>>>> _activityData = {
-//     'paris': {
-//       'Cultural Experience': [
-//         {
-//           'name': 'Louvre Museum Tour',
-//           'description': 'Guided tour of the world\'s most visited museum, featuring masterpieces like the Mona Lisa and Venus de Milo.',
-//           'duration': '3 hours',
-//           'price': '€€',
-//           'imageQuery': 'Paris Louvre Museum tour art',
-//           'highlights': ['Skip-the-line access', 'Expert art historian guides', 'All major masterpieces covered']
-//         },
-//         {
-//           'name': 'Seine River Cruise',
-//           'description': 'Leisurely boat ride along the Seine River with views of Paris\'s most famous monuments and bridges.',
-//           'duration': '1 hour',
-//           'price': '€€',
-//           'imageQuery': 'Paris Seine River cruise boat',
-//           'highlights': ['Panoramic city views', 'Audio commentary in multiple languages', 'Day and evening options']
-//         }
-//       ],
-//       'Food & Dining': [
-//         {
-//           'name': 'Parisian Pastry Workshop',
-//           'description': 'Learn to make authentic French pastries like croissants and macarons with a professional pastry chef.',
-//           'duration': '2-3 hours',
-//           'price': '€€€',
-//           'imageQuery': 'Paris pastry cooking class macaron',
-//           'highlights': ['Hands-on experience', 'Small group setting', 'Take home your creations']
-//         },
-//         {
-//           'name': 'Montmartre Food Tour',
-//           'description': 'Walking tour through the bohemian Montmartre neighborhood, sampling local cheeses, wines, and delicacies.',
-//           'duration': '3 hours',
-//           'price': '€€',
-//           'imageQuery': 'Paris Montmartre food tour cheese wine',
-//           'highlights': ['6-8 food tastings included', 'Local neighborhood insights', 'Small group experience']
-//         }
-//       ],
-//       'Outdoor Adventure': [
-//         {
-//           'name': 'Bike Tour of Paris',
-//           'description': 'Guided bicycle tour through the historic heart of Paris, covering major landmarks and hidden gems.',
-//           'duration': '3-4 hours',
-//           'price': '€€',
-//           'imageQuery': 'Paris bike tour cycling Seine',
-//           'highlights': ['Comfortable bikes provided', 'Scenic routes away from traffic', 'Photo opportunities at key sites']
-//         }
+//         {'date': '2025-07-20', 'condition': 'Clear and Sunny', 'tempC': 26, 'tempF': 79},
+//         {'date': '2025-07-21', 'condition': 'Dry and Warm', 'tempC': 27, 'tempF': 81},
 //       ]
 //     },
-//     'tokyo': {
-//       'Cultural Experience': [
+//     'lamu': {
+//       'name': 'Lamu Island, Kenya',
+//       'description': 'A part of Kenya’s Lamu Archipelago, Lamu Old Town is the oldest and best-preserved Swahili settlement in East Africa, a UNESCO World Heritage Site. Known for its narrow streets, dhows, and relaxed pace of life.',
+//       'bestTimeToVisit': 'July to October or January to March',
+//       'language': 'Swahili, English',
+//       'currency': 'Kenyan Shilling (KES)',
+//       'attractions': [
 //         {
-//           'name': 'Teamlab Borderless Museum',
-//           'description': 'Interactive digital art museum with immersive, boundary-defying installations that respond to viewer presence.',
-//           'duration': '3 hours',
-//           'price': '¥¥',
-//           'imageQuery': 'Tokyo TeamLab Borderless digital art museum interactive',
-//           'highlights': ['Interactive art installations', 'Constantly changing exhibits', 'Perfect for photography']
+//           'name': 'Lamu Old Town',
+//           'shortDescription': 'UNESCO World Heritage site with unique Swahili architecture',
+//           'imageQuery': 'Lamu Old Town Kenya streets',
+//           'rating': 4.7
 //         },
 //         {
-//           'name': 'Sumo Wrestling Tournament',
-//           'description': 'Experience Japan\'s national sport at a live tournament with ceremonial rituals and thrilling matches.',
-//           'duration': '4-6 hours',
-//           'price': '¥¥¥',
-//           'imageQuery': 'Tokyo sumo wrestling tournament match',
-//           'highlights': ['Expert commentary available', 'Experience ancient Japanese tradition', 'Opportunity to see top-ranked wrestlers']
-//         }
-//       ],
-//       'Food & Dining': [
-//         {
-//           'name': 'Tsukiji Outer Market Tour',
-//           'description': 'Guided food tour of the famous outer market area with tastings of fresh seafood and Japanese delicacies.',
-//           'duration': '3 hours',
-//           'price': '¥¥',
-//           'imageQuery': 'Tokyo Tsukiji Market seafood tasting',
-//           'highlights': ['Sample 6-8 specialties', 'Local expert guide', 'Learn about Japanese food culture']
+//           'name': 'Shela Beach',
+//           'shortDescription': 'Pristine beach known for its tranquility and beauty',
+//           'imageQuery': 'Shela Beach Lamu Kenya',
+//           'rating': 4.8
 //         },
 //         {
-//           'name': 'Izakaya Hopping in Shinjuku',
-//           'description': 'Evening tour of traditional Japanese pubs in Tokyo\'s vibrant nightlife district.',
-//           'duration': '3-4 hours',
-//           'price': '¥¥',
-//           'imageQuery': 'Tokyo izakaya bar hopping night',
-//           'highlights': ['Visit 3-4 local establishments', 'Food and drinks included', 'Experience authentic local nightlife']
+//           'name': 'Dhow Sailing',
+//           'shortDescription': 'Traditional sailing boat trips around the archipelago',
+//           'imageQuery': 'Lamu dhow sailing sunset',
+//           'rating': 4.9
+//         },
+//         {
+//           'name': 'Lamu Museum',
+//           'shortDescription': 'Exhibits on Swahili culture and local history',
+//           'imageQuery': 'Lamu Museum Kenya artifacts',
+//           'rating': 4.4
 //         }
 //       ],
-//       'Outdoor Adventure': [
-//         {
-//           'name': 'Mount Fuji Day Trip',
-//           'description': 'Guided excursion to Japan\'s iconic mountain with opportunities for hiking and scenic views.',
-//           'duration': 'Full day',
-//           'price': '¥¥¥',
-//           'imageQuery': 'Japan Mount Fuji hiking view',
-//           'highlights': ['Transportation from Tokyo included', 'Visit 5th Station (weather permitting)', 'Lake Kawaguchi views']
-//         }
+//       'weather': [
+//         {'date': '2025-08-15', 'condition': 'Warm and Breezy', 'tempC': 28, 'tempF': 82},
+//         {'date': '2025-02-20', 'condition': 'Hot and Sunny', 'tempC': 31, 'tempF': 88},
 //       ]
 //     }
 //   };
 
 //   // Sample itineraries for popular destinations
 //   static final Map<String, List<Map<String, dynamic>>> _itineraryData = {
-//     'paris': [
+//     'nairobi': [
 //       {
 //         'day': 1,
-//         'date': 'Monday, April 21',
+//         'date': 'Day 1',
 //         'activities': [
 //           {
 //             'time': 'Morning',
-//             'activity': 'Eiffel Tower Visit',
-//             'notes': 'Arrive early to avoid long lines. Consider booking tickets in advance for the summit.'
+//             'activity': 'David Sheldrick Wildlife Trust',
+//             'notes': 'Visit during public viewing hours (usually 11am-12pm) to see baby elephants being fed.'
 //           },
 //           {
 //             'time': 'Lunch',
-//             'activity': 'Café at Champ de Mars',
-//             'notes': 'Enjoy a relaxed lunch with Eiffel Tower views. Try a traditional Croque Monsieur.'
+//             'activity': 'Utamaduni Craft Centre or nearby restaurant',
+//             'notes': 'Shop for crafts and enjoy a Kenyan meal.'
 //           },
 //           {
 //             'time': 'Afternoon',
-//             'activity': 'Seine River Cruise',
-//             'notes': 'One-hour scenic boat tour passing major landmarks. Audio guides available in multiple languages.'
+//             'activity': 'Giraffe Centre',
+//             'notes': 'Feed the Rothschild giraffes and learn about conservation efforts.'
+//           },
+//           {
+//             'time': 'Evening',
+//             'activity': 'Dinner at Carnivore Restaurant',
+//             'notes': 'Experience a unique "beast of a feast" with various game meats (and vegetarian options).'
 //           }
 //         ]
 //       },
 //       {
 //         'day': 2,
-//         'date': 'Tuesday, April 22',
+//         'date': 'Day 2',
 //         'activities': [
 //           {
 //             'time': 'Morning',
-//             'activity': 'Louvre Museum',
-//             'notes': 'Focus on key works like Mona Lisa, Venus de Milo, and Winged Victory. Pick up a museum map.'
-//           },
-//           {
-//             'time': 'Afternoon',
-//             'activity': 'Tuileries Garden & Place de la Concorde',
-//             'notes': 'Leisurely walk through historic gardens and square. Great photo opportunities.'
-//           },
-//           {
-//             'time': 'Evening',
-//             'activity': 'Dinner in Le Marais',
-//             'notes': 'Explore this trendy district with many restaurant options from traditional to contemporary.'
-//           }
-//         ]
-//       },
-//       {
-//         'day': 3,
-//         'date': 'Wednesday, April 23',
-//         'activities': [
-//           {
-//             'time': 'Morning',
-//             'activity': 'Montmartre Walking Tour',
-//             'notes': 'Visit Sacré-Cœur Basilica, Place du Tertre, and see where famous artists once lived.'
+//             'activity': 'Nairobi National Park Safari',
+//             'notes': 'Early morning game drive to see wildlife against the city skyline.'
 //           },
 //           {
 //             'time': 'Lunch',
-//             'activity': 'Authentic Crêperie',
-//             'notes': 'Try both savory (galettes) and sweet crêpes at a local favorite spot.'
+//             'activity': 'Picnic in the park or restaurant near the park',
+//             'notes': 'Enjoy the natural surroundings.'
 //           },
 //           {
 //             'time': 'Afternoon',
-//             'activity': 'Shopping on Champs-Élysées',
-//             'notes': 'Walk the famous avenue from Arc de Triomphe to Place de la Concorde. Mix of luxury and mainstream shops.'
+//             'activity': 'Karen Blixen Museum & Kazuri Beads Factory',
+//             'notes': 'Explore colonial history and support local women artisans.'
 //           }
 //         ]
 //       }
 //     ],
-//     'tokyo': [
+//     'mombasa': [
 //       {
 //         'day': 1,
-//         'date': 'Monday, April 21',
+//         'date': 'Day 1',
 //         'activities': [
 //           {
 //             'time': 'Morning',
-//             'activity': 'Tsukiji Outer Market',
-//             'notes': 'Best visited early for breakfast/brunch with the freshest seafood. Try various food stalls.'
+//             'activity': 'Fort Jesus Visit',
+//             'notes': 'Explore the historic fort and learn about Mombasa\'s past.'
+//           },
+//           {
+//             'time': 'Lunch',
+//             'activity': 'Swahili cuisine in Old Town',
+//             'notes': 'Try local dishes like pilau or biryani.'
 //           },
 //           {
 //             'time': 'Afternoon',
-//             'activity': 'Senso-ji Temple & Asakusa',
-//             'notes': 'Explore Japan\'s oldest Buddhist temple and the charming traditional area around it.'
+//             'activity': 'Explore Mombasa Old Town',
+//             'notes': 'Wander through the narrow streets, admire the architecture, and shop for souvenirs.'
 //           },
 //           {
 //             'time': 'Evening',
-//             'activity': 'Tokyo Skytree',
-//             'notes': 'Visit observation deck for stunning night views of Tokyo\'s skyline. Last admission at 9pm.'
+//             'activity': 'Dinner at a beachfront restaurant',
+//             'notes': 'Enjoy fresh seafood with ocean views.'
 //           }
 //         ]
 //       },
 //       {
 //         'day': 2,
-//         'date': 'Tuesday, April 22',
+//         'date': 'Day 2',
 //         'activities': [
 //           {
-//             'time': 'Morning',
-//             'activity': 'Meiji Shrine & Yoyogi Park',
-//             'notes': 'Peaceful forest shrine in the heart of Tokyo. Try to witness a traditional wedding if lucky.'
-//           },
-//           {
-//             'time': 'Afternoon',
-//             'activity': 'Harajuku & Takeshita Street',
-//             'notes': 'Experience Tokyo\'s youth culture, fashion boutiques, and unique crepe stands.'
+//             'time': 'Full Day',
+//             'activity': 'Diani Beach Relaxation & Activities',
+//             'notes': 'Travel to Diani. Relax on the white sandy beaches, swim, snorkel, or try watersports.'
 //           },
 //           {
 //             'time': 'Evening',
-//             'activity': 'Shibuya Crossing & Neighborhood',
-//             'notes': 'Witness the famous scramble crossing and explore the exciting entertainment district.'
-//           }
-//         ]
-//       },
-//       {
-//         'day': 3,
-//         'date': 'Wednesday, April 23',
-//         'activities': [
-//           {
-//             'time': 'Morning',
-//             'activity': 'TeamLab Borderless Museum',
-//             'notes': 'Allow plenty of time to explore this immersive digital art space. Book tickets in advance.'
-//           },
-//           {
-//             'time': 'Lunch',
-//             'activity': 'Ramen at Yokohama Ramen Museum',
-//             'notes': 'Sample different regional ramen styles all in one location.'
-//           },
-//           {
-//             'time': 'Afternoon',
-//             'activity': 'Odaiba Waterfront',
-//             'notes': 'Visit the entertainment island with shopping malls, games centers and a small replica of the Statue of Liberty.'
+//             'activity': 'Sunset Dhow Cruise (optional)',
+//             'notes': 'Enjoy a scenic cruise if available.'
 //           }
 //         ]
 //       }
 //     ],
-//     'new york': [
+//     'maasai-mara': [
 //       {
 //         'day': 1,
-//         'date': 'Monday, April 21',
+//         'date': 'Day 1',
 //         'activities': [
 //           {
-//             'time': 'Morning',
-//             'activity': 'Central Park Exploration',
-//             'notes': 'Visit Bethesda Fountain, Bow Bridge, and Strawberry Fields. Consider renting bikes.'
-//           },
-//           {
 //             'time': 'Afternoon',
-//             'activity': 'Metropolitan Museum of Art',
-//             'notes': 'Focus on key collections. Don\'t miss the rooftop garden in good weather (May-October).'
+//             'activity': 'Arrival & Evening Game Drive',
+//             'notes': 'Fly or drive to Maasai Mara, check into your lodge/camp, and head out for your first game drive.'
 //           },
 //           {
 //             'time': 'Evening',
-//             'activity': 'Times Square',
-//             'notes': 'Experience the bright lights and energy of this iconic intersection. Best after dark.'
+//             'activity': 'Dinner and Relaxation at Lodge/Camp',
+//             'notes': 'Enjoy the sounds of the African bush.'
 //           }
 //         ]
 //       },
 //       {
 //         'day': 2,
-//         'date': 'Tuesday, April 22',
+//         'date': 'Day 2',
 //         'activities': [
 //           {
 //             'time': 'Morning',
-//             'activity': 'Statue of Liberty & Ellis Island',
-//             'notes': 'Book reserve tickets in advance for crown access. Allow 4-5 hours for both islands.'
+//             'activity': 'Full Day Game Drive with Picnic Lunch',
+//             'notes': 'Explore different areas of the Mara, searching for the Big Five and other wildlife. Witness the Great Migration if in season (July-Oct).'
 //           },
-//           {
-//             'time': 'Late Afternoon',
-//             'activity': 'Wall Street & Financial District',
-//             'notes': 'See the New York Stock Exchange, Bull statue, and Federal Hall.'
-//           },
-//           {
-//             'time': 'Evening',
-//             'activity': 'Brooklyn Bridge Sunset Walk',
-//             'notes': 'Walk from Manhattan to Brooklyn for spectacular skyline views. Allow 1 hour each way.'
+//            {
+//             'time': 'Afternoon',
+//             'activity': 'Continue Game Drive or Optional Maasai Village Visit',
+//             'notes': 'Learn about Maasai culture (additional cost usually applies).'
 //           }
 //         ]
 //       },
 //       {
 //         'day': 3,
-//         'date': 'Wednesday, April 23',
+//         'date': 'Day 3',
 //         'activities': [
 //           {
 //             'time': 'Morning',
-//             'activity': 'High Line & Chelsea Market',
-//             'notes': 'Walk the elevated park built on former railway tracks, then explore gourmet food stalls.'
-//           },
-//           {
-//             'time': 'Afternoon',
-//             'activity': 'Museum of Modern Art (MoMA)',
-//             'notes': 'Home to renowned modern artworks. Free admission on Friday afternoons.'
-//           },
-//           {
-//             'time': 'Evening',
-//             'activity': 'Broadway Show',
-//             'notes': 'Experience world-class theater. Consider TKTS booth for discounted same-day tickets.'
+//             'activity': 'Optional Hot Air Balloon Safari or Early Morning Game Drive',
+//             'notes': 'Balloon safari offers breathtaking views (book in advance, extra cost). Followed by breakfast and departure.'
 //           }
 //         ]
 //       }
 //     ]
+//   };
+
+//   // Activity suggestions by category and location
+//   static final Map<String, Map<String, List<Map<String, dynamic>>>> _activityData = {
+//     'nairobi': {
+//       'Wildlife & Nature': [
+//         {
+//           'name': 'Nairobi National Park Safari Drive',
+//           'description': 'Experience a unique safari with the city skyline as a backdrop. Spot lions, giraffes, rhinos, and more.',
+//           'duration': '4-5 hours',
+//           'price': 'KES $$$',
+//           'imageQuery': 'Nairobi National Park safari vehicle',
+//           'highlights': ['Closest National Park to a city center', 'Black rhino sanctuary', 'Diverse wildlife']
+//         },
+//         {
+//           'name': 'Visit the Giraffe Centre',
+//           'description': 'Get up close and personal with endangered Rothschild giraffes. Feed them and learn about conservation.',
+//           'duration': '1-2 hours',
+//           'price': 'KES $',
+//           'imageQuery': 'Feeding giraffe Nairobi Centre',
+//           'highlights': ['Kiss a giraffe', 'Educational talks', 'Nature trail']
+//         }
+//       ],
+//       'Cultural Experience': [
+//         {
+//           'name': 'Bomas of Kenya Tour',
+//           'description': 'Discover Kenya\'s diverse ethnic groups through traditional dances, music, and homestead replicas.',
+//           'duration': '3-4 hours',
+//           'price': 'KES $$',
+//           'imageQuery': 'Bomas of Kenya dancers',
+//           'highlights': ['Vibrant traditional dances', 'Cultural village tour', 'Acrobatic shows']
+//         },
+//         {
+//           'name': 'Karen Blixen Museum Visit',
+//           'description': 'Step back in time at the former home of the "Out of Africa" author, Karen Blixen.',
+//           'duration': '1-2 hours',
+//           'price': 'KES $$',
+//           'imageQuery': 'Karen Blixen Museum house Nairobi',
+//           'highlights': ['Colonial history', 'Beautiful gardens', 'Movie memorabilia']
+//         }
+//       ],
+//       'Food & Dining': [
+//         {
+//           'name': 'Dinner at Carnivore Restaurant',
+//           'description': 'A world-famous restaurant offering a variety of game meats roasted on traditional Maasai swords.',
+//           'duration': '2-3 hours',
+//           'price': 'KES $$$$',
+//           'imageQuery': 'Carnivore Restaurant Nairobi meat',
+//           'highlights': ['Unique dining experience', 'Nyama Choma (roasted meat)', 'Vegetarian options available']
+//         }
+//       ]
+//     },
+//     'mombasa': {
+//       'Beach & Water Activities': [
+//         {
+//           'name': 'Diani Beach Relaxation',
+//           'description': 'Unwind on the pristine white sands of Diani Beach, swim in the turquoise waters, or enjoy beachside amenities.',
+//           'duration': 'Half to Full Day',
+//           'price': 'Free (activity costs vary)',
+//           'imageQuery': 'Diani Beach Kenya palm trees',
+//           'highlights': ['Award-winning beach', 'Watersports (snorkeling, diving, kitesurfing)', 'Beach resorts']
+//         },
+//         {
+//           'name': 'Mombasa Marine Park Snorkeling/Diving',
+//           'description': 'Explore vibrant coral reefs and diverse marine life in the protected waters of the marine park.',
+//           'duration': '3-4 hours',
+//           'price': 'KES $$$',
+//           'imageQuery': 'Mombasa Marine Park colorful fish',
+//           'highlights': ['Clear waters', 'Coral gardens', 'Chance to see dolphins']
+//         }
+//       ],
+//       'Historical & Cultural': [
+//         {
+//           'name': 'Fort Jesus Exploration',
+//           'description': 'Discover the rich history of this 16th-century Portuguese fort, a UNESCO World Heritage site.',
+//           'duration': '2-3 hours',
+//           'price': 'KES $$',
+//           'imageQuery': 'Fort Jesus Mombasa cannons',
+//           'highlights': ['Historical architecture', 'Museum exhibits', 'Panoramic ocean views']
+//         },
+//         {
+//           'name': 'Old Town Walking Tour',
+//           'description': 'Wander through the narrow, winding streets of Mombasa\'s historic Old Town, admiring the unique Swahili architecture and bustling markets.',
+//           'duration': '2-3 hours',
+//           'price': 'KES $ (guide optional)',
+//           'imageQuery': 'Mombasa Old Town carved doors',
+//           'highlights': ['Swahili culture', 'Spice market', 'Local crafts']
+//         }
+//       ]
+//     },
+//     'maasai-mara': {
+//       'Safari Experience': [
+//         {
+//           'name': 'Full Day Game Drive',
+//           'description': 'Embark on an extensive game drive across the Maasai Mara plains to spot the Big Five and witness the incredible wildlife density.',
+//           'duration': '8-10 hours',
+//           'price': 'Included in most safari packages',
+//           'imageQuery': 'Maasai Mara safari jeep lions',
+//           'highlights': ['High chance of Big Five sightings', 'Great Migration (seasonal)', 'Vast landscapes']
+//         },
+//         {
+//           'name': 'Hot Air Balloon Safari',
+//           'description': 'Experience a breathtaking sunrise hot air balloon ride over the Mara, followed by a champagne bush breakfast.',
+//           'duration': '3-4 hours (early morning)',
+//           'price': 'KES $$$$$',
+//           'imageQuery': 'Maasai Mara balloon safari sunrise animals',
+//           'highlights': ['Unforgettable aerial views', 'Wildlife spotting from above', 'Champagne breakfast']
+//         }
+//       ],
+//       'Cultural Immersion': [
+//         {
+//           'name': 'Maasai Village Visit',
+//           'description': 'Visit a traditional Maasai village to learn about their unique culture, customs, and way of life.',
+//           'duration': '1-2 hours',
+//           'price': 'KES $$',
+//           'imageQuery': 'Maasai warriors jumping Kenya',
+//           'highlights': ['Traditional dances', 'Manyatta homes', 'Local crafts']
+//         }
+//       ]
+//     }
 //   };
 
 //   // Find destination information based on location name
