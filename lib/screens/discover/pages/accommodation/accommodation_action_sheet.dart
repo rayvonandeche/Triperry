@@ -9,9 +9,9 @@ class AccommodationActionSheet extends StatelessWidget {
   final Map<String, dynamic> item;
   
   const AccommodationActionSheet({
-    Key? key, 
+    super.key,
     required this.item
-  }) : super(key: key);
+  }) ;
 
   @override
   Widget build(BuildContext context) {

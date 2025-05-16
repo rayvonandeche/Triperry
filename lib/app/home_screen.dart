@@ -11,6 +11,9 @@ import 'package:triperry/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:triperry/services/auth_service.dart';
 import 'package:triperry/widgets/triperry_app_bar.dart';
+// Removed unused import
+import 'package:triperry/features/app_bar_actions/ai/mini_assistant_service.dart';
+import 'package:triperry/screens/ai/models/chat_message.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,7 +29,11 @@ class _HomeScreenState extends State<HomeScreen>
   late List<Animation<double>> _scaleAnimations;
   late List<Animation<double>> _fadeAnimations;
   bool showAI = false;
+  bool _showMiniAssistant = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  
+  // Mini AI assistant service
+  final MiniAssistantService _miniAssistantService = MiniAssistantService();
 
   @override
   void initState() {
@@ -87,21 +94,45 @@ class _HomeScreenState extends State<HomeScreen>
       });
     }
   }
-
   @override
   void dispose() {
     _containerController.dispose();
+    _miniAssistantService.dispose();
     super.dispose();
-  }
-
-  Future<void> _onButtonPressed() async {
-    if (!showAI) {
-      _containerController.forward();
-      await Future.delayed(const Duration(milliseconds: 200));
-      setState(() => showAI = true);
+  }  Future<void> _onButtonPressed() async {
+    // Toggle between showing mini-assistant or full AI screen
+    if (!showAI && !_showMiniAssistant) {
+      setState(() => _showMiniAssistant = true);
+    } else if (_showMiniAssistant) {
+      setState(() => _showMiniAssistant = false);
     } else {
       await _handleBack();
     }
+  }
+    void _handleMiniAssistantSubmit(String text) {
+    if (text.isEmpty) return;
+    
+    // If assistant is not showing, show it with a nice animation
+    if (!_showMiniAssistant) {
+      setState(() => _showMiniAssistant = true);
+    }
+    
+    // Add a small delay for better UX
+    Future.delayed(const Duration(milliseconds: 50), () {
+      _miniAssistantService.addUserMessage(text);
+    });
+  }
+  
+  void _expandToFullAi() async {
+    setState(() => _showMiniAssistant = false);
+    
+    // Small delay to allow the mini assistant to close
+    await Future.delayed(const Duration(milliseconds: 100));
+    
+    // Open the full AI screen
+    _containerController.forward();
+    await Future.delayed(const Duration(milliseconds: 200));
+    setState(() => showAI = true);
   }
 
   Future<void> _handleBack() async {
@@ -117,7 +148,6 @@ class _HomeScreenState extends State<HomeScreen>
       containerController: _containerController,
     );
   }
-
   Widget _buildAppBar(BuildContext context, int currentIndex, bool showAI) {
     final String title;
     final List<Widget> actions;
@@ -182,8 +212,12 @@ class _HomeScreenState extends State<HomeScreen>
       title: title,
       actions: actions,
       showAI: showAI,
+      showMiniInput: _showMiniAssistant && !showAI,
       onBack: _handleBack,
       onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+      onMiniInputSubmit: _handleMiniAssistantSubmit,
+      onMiniInputCancel: () => setState(() => _showMiniAssistant = false),
+      onMiniInputExpand: _expandToFullAi,
     );
   }
 
@@ -196,13 +230,13 @@ class _HomeScreenState extends State<HomeScreen>
                 Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1))
         : SystemUiOverlayStyle.dark.copyWith(
             statusBarColor:
-                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1)));
-
-    return PopScope(
-      canPop: !showAI,
+                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1)));    return PopScope(
+      canPop: !showAI && !_showMiniAssistant,
       onPopInvokedWithResult: (didPop, _) async {
         if (showAI) {
           await _handleBack();
+        } else if (_showMiniAssistant) {
+          setState(() => _showMiniAssistant = false);
         }
       },
       child: Scaffold(
@@ -224,24 +258,73 @@ class _HomeScreenState extends State<HomeScreen>
                           : _selectedIndex == 2
                               ? const Trips()
                               : const ProfileScreen(),
-            ),
-            Positioned(
+            ),            Positioned(
               top: 0,
               left: 0,
               right: 0,
               child: _buildAppBar(context, _selectedIndex, showAI),
-            ),
+            ),              // Mini AI Assistant Response
+            if (_showMiniAssistant && !showAI)
+              Positioned(
+                top: kToolbarHeight + MediaQuery.of(context).padding.top + 5,
+                left: 0,
+                right: 0,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, -0.2),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: StreamBuilder<bool>(
+                    key: ValueKey('mini_assistant_response'),
+                    stream: _miniAssistantService.isTypingStream,
+                    initialData: _miniAssistantService.isTyping,
+                    builder: (context, typingSnapshot) {
+                      final isTyping = typingSnapshot.data ?? false;
+                      final lastResponse = _miniAssistantService.lastResponse;
+                      
+                      if (lastResponse == null && !isTyping) return const SizedBox.shrink();
+                      
+                      return _buildMiniAssistantResponse(isTyping, lastResponse);
+                    },
+                  ),
+                ),
+              ),
           ],
         ),
         bottomNavigationBar:
-            showAI ? null : _buildBottomNavigationBar(context, _selectedIndex),
-        floatingActionButton: !showAI
+            showAI ? null : _buildBottomNavigationBar(context, _selectedIndex),        floatingActionButton: !showAI
             ? FloatingActionButton(
                 onPressed: _onButtonPressed,
-                backgroundColor: AppTheme.primaryColor,
-                child: const Icon(
-                  Icons.auto_awesome,
-                  color: Colors.white,
+                backgroundColor: _showMiniAssistant 
+                  ? AppTheme.secondaryColor
+                  : AppTheme.primaryColor,
+                tooltip: _showMiniAssistant ? 'Close Assistant' : 'AI Assistant',
+                elevation: 4,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return ScaleTransition(scale: animation, child: child);
+                  },
+                  child: _showMiniAssistant
+                      ? const Icon(
+                          Icons.close_rounded,
+                          key: ValueKey('close'),
+                          color: Colors.white,
+                        )
+                      : const Icon(
+                          Icons.auto_awesome,
+                          key: ValueKey('assistant'),
+                          color: Colors.white,
+                        ),
                 ),
               )
             : null,
@@ -255,8 +338,164 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
     );
-  }
+  }  Widget _buildMiniAssistantResponse(bool isTyping, ChatMessage? lastResponse) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode 
+        ? Colors.grey[850]!.withOpacity(0.95)
+        : Colors.white.withOpacity(0.95);
 
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: isDarkMode
+              ? Colors.white.withOpacity(0.1)
+              : Colors.black.withOpacity(0.05),
+          width: 0.8,
+        ),
+        gradient: LinearGradient(
+          colors: isDarkMode
+              ? [
+                  Colors.grey[850]!.withOpacity(0.95),
+                  Colors.grey[900]!.withOpacity(0.9),
+                ]
+              : [
+                  Colors.white.withOpacity(0.95),
+                  Colors.grey[50]!.withOpacity(0.9),
+                ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                margin: const EdgeInsets.only(right: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white,
+                  size: 12,
+                ),
+              ),
+              Text(
+                'Triperry AI',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black87,
+                ),
+              ),
+              const Spacer(),
+              InkWell(
+                onTap: _expandToFullAi,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(
+                    Icons.open_in_full,
+                    size: 16,
+                    color: isDarkMode ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: () => setState(() => _showMiniAssistant = false),
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(
+                    Icons.close,
+                    size: 16,
+                    color: isDarkMode ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          isTyping
+              ? _buildTypingIndicator()
+              : lastResponse != null
+                  ? Text(
+                      lastResponse.text,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildTypingIndicator() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: AppTheme.primaryColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 5),
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: AppTheme.primaryColor.withOpacity(0.7),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 5),
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: AppTheme.primaryColor.withOpacity(0.4),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          'Thinking...',
+          style: TextStyle(
+            fontStyle: FontStyle.italic,
+            fontSize: 14,
+            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+          ),
+        ),
+      ],
+    );
+  }
+  
   Widget _buildBottomNavigationBar(BuildContext context, int currentIndex) {
     return ClipRRect(
       child: BackdropFilter(

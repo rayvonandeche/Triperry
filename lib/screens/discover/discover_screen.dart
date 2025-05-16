@@ -3,6 +3,9 @@ import 'package:triperry/theme/app_theme.dart';
 import 'package:triperry/screens/discover/pages/pages.dart';
 import 'pages/restaurant/restaurant.dart';
 import 'pages/accommodation/accommodation.dart';
+import 'pages/transport/transport.dart';
+import 'pages/activities/activities.dart';
+import 'pages/packages/packages.dart';
 
 class DiscoverPage extends StatefulWidget{
   final double toolbarHeight;
@@ -43,12 +46,13 @@ class _DiscoverPageState extends State<DiscoverPage> {
     super.initState();
     _scrollController = ScrollController();
   }
-
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }  // Method to build content based on selected category
+  }  
+
+  // Method to build content based on selected category
   Widget _buildCategoryContent(int index) {
     switch (index) {
       case 0: // Featured
@@ -56,11 +60,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
       case 1: // Accommodation
         return const Accommodation();
       case 2: // Transport
-        return buildTransportContent();
+        return const Transport();
       case 3: // Activities
-        return buildActivitiesContent();
+        return const Activities();
       case 4: // Packages
-        return buildPackagesContent();
+        return const Packages();
       default:
         return const Restaurant();
     }

@@ -1,21 +1,30 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import 'triperry_mini_input.dart';
 
 class TriperryAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget> actions;
   final bool showAI;
+  final bool showMiniInput;
   final VoidCallback? onBack;
   final VoidCallback? onMenu;
+  final Function(String)? onMiniInputSubmit;
+  final VoidCallback? onMiniInputCancel;
+  final VoidCallback? onMiniInputExpand;
 
   const TriperryAppBar({
     super.key,
     required this.title,
     this.actions = const [],
     this.showAI = false,
+    this.showMiniInput = false,
     this.onBack,
     this.onMenu,
+    this.onMiniInputSubmit,
+    this.onMiniInputCancel,
+    this.onMiniInputExpand,
   });
 
   @override
@@ -58,37 +67,41 @@ class TriperryAppBar extends StatelessWidget implements PreferredSizeWidget {
                 spreadRadius: 0,
               ),
             ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                showAI
-                    ? IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                        onPressed: onBack,
-                      )
-                    : IconButton(
-                        icon: const Icon(Icons.menu),
-                        onPressed: onMenu,
+          ),          child: showMiniInput 
+              ? TriperryMiniInput(
+                  onSubmitted: onMiniInputSubmit ?? (_) {},
+                  onCancel: onMiniInputCancel ?? () {},
+                  onExpand: onMiniInputExpand ?? () {},
+                )
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    children: [
+                      showAI
+                          ? IconButton(
+                              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                              onPressed: onBack,
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.menu),
+                              onPressed: onMenu,
+                            ),
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? AppTheme.lightText
+                                  : AppTheme.darkText,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightText
-                            : AppTheme.darkText,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      const Spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: actions,
+                      ),              ],
+                  ),
                 ),
-                const Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: actions,
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
