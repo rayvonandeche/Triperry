@@ -126,11 +126,9 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
       travelPreferences,
     );
     
-    if (!mounted) return;
-
-    if (success) {
-      // Navigate to home screen, replacing the login screen
-      Navigator.of(context).pushReplacementNamed('/home');
+    if (!mounted) return;    if (success) {
+      // Navigate to AI screen, replacing the login screen
+      Navigator.of(context).pushReplacementNamed('/ai');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

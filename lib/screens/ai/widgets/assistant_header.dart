@@ -19,6 +19,12 @@ class AssistantHeader extends StatelessWidget {
   
   /// Callback when toggle button is tapped
   final VoidCallback? onToggleTap;
+  
+  /// Callback when back button is tapped
+  final VoidCallback? onBackTap;
+  
+  /// Whether to show back button
+  final bool showBackButton;
 
   const AssistantHeader({
     super.key,
@@ -28,6 +34,8 @@ class AssistantHeader extends StatelessWidget {
     this.showToggleButton = false,
     this.toggleLabel = "",
     this.onToggleTap,
+    this.onBackTap,
+    this.showBackButton = true,
   });
 
   @override
@@ -66,6 +74,17 @@ class AssistantHeader extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Back button
+                  if (showBackButton)
+                    Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                        onPressed: onBackTap,
+                        tooltip: 'Back to home',
+                      ),
+                    ),
+                  
                   CircleAvatar(
                     backgroundColor: Colors.white,
                     radius: 28, // Increased size for better visibility

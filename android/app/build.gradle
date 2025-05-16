@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "ke.co.andeche.animations"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

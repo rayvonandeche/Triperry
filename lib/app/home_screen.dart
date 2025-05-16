@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:triperry/screens/ai/ai_screen.dart';
+import 'package:triperry/screens/ai/ai_screen_modular.dart';
 import 'package:triperry/screens/buddies/buddies_screen.dart';
 import 'package:triperry/screens/discover/discover_screen.dart';
 import 'package:triperry/screens/profile/profile_screen.dart';
@@ -10,8 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:triperry/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:triperry/services/auth_service.dart';
-
-part './drawer.dart';
+import 'package:triperry/widgets/triperry_app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,15 +31,6 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    
-    // Check if user is logged in
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authService = Provider.of<AuthService>(context, listen: false);
-      if (!authService.isLoggedIn) {
-        Navigator.of(context).pushReplacementNamed('/login');
-      }
-    });
-    
     _containerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -83,6 +73,22 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Skip auth check if coming from AI screen
+    final route = ModalRoute.of(context)?.settings.name;
+    if (route != '/ai') {
+      // Check if user is logged in
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final authService = Provider.of<AuthService>(context, listen: false);
+        if (!authService.isLoggedIn) {
+          Navigator.of(context).pushReplacementNamed('/login');
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _containerController.dispose();
     super.dispose();
@@ -113,11 +119,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildAppBar(BuildContext context, int currentIndex, bool showAI) {
-    final double toolbarHeight =
-        kToolbarHeight + MediaQuery.of(context).padding.top;
     final String title;
     final List<Widget> actions;
-
     if (showAI) {
       title = 'Triperry';
       actions = [
@@ -135,15 +138,11 @@ class _HomeScreenState extends State<HomeScreen>
           actions = [
             IconButton(
               icon: const Icon(Icons.search_rounded),
-              onPressed: () {
-                // Show search
-              },
+              onPressed: () {},
             ),
             IconButton(
               icon: const Icon(Icons.filter_list_rounded),
-              onPressed: () {
-                // Show filters
-              },
+              onPressed: () {},
             ),
           ];
           break;
@@ -152,9 +151,7 @@ class _HomeScreenState extends State<HomeScreen>
           actions = [
             IconButton(
               icon: const Icon(Icons.add_rounded),
-              onPressed: () {
-                // Add new trip
-              },
+              onPressed: () {},
             ),
           ];
           break;
@@ -163,9 +160,7 @@ class _HomeScreenState extends State<HomeScreen>
           actions = [
             IconButton(
               icon: const Icon(Icons.search_rounded),
-              onPressed: () {
-                // Search buddies
-              },
+              onPressed: () {},
             ),
           ];
           break;
@@ -174,9 +169,7 @@ class _HomeScreenState extends State<HomeScreen>
           actions = [
             IconButton(
               icon: const Icon(Icons.settings_rounded),
-              onPressed: () {
-                // Open settings
-              },
+              onPressed: () {},
             ),
           ];
           break;
@@ -185,78 +178,12 @@ class _HomeScreenState extends State<HomeScreen>
           actions = [];
       }
     }
-
-    return ClipRRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 4),
-        child: Container(
-          height: toolbarHeight,
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-          alignment: Alignment.centerRight,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).brightness == Brightness.dark
-                    ? AppTheme.darkSurface.withOpacity(0.97)
-                    : AppTheme.lightSurface.withOpacity(0.97),
-                Theme.of(context).brightness == Brightness.dark
-                    ? AppTheme.darkSurface.withOpacity(0.85)
-                    : AppTheme.lightSurface.withOpacity(0.85),
-              ],
-              stops: const [0.3, 1.0],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-            border: Border(
-              bottom: BorderSide(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withOpacity(0.06)
-                    : Colors.black.withOpacity(0.03),
-                width: 0.8,
-              ),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-                spreadRadius: 0,
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                showAI
-                    ? IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                        onPressed: _handleBack,
-                      )
-                    : IconButton(
-                        icon: const Icon(Icons.menu),
-                        onPressed: () =>
-                            _scaffoldKey.currentState?.openDrawer(),
-                      ),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightText
-                            : AppTheme.darkText,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: actions,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return TriperryAppBar(
+      title: title,
+      actions: actions,
+      showAI: showAI,
+      onBack: _handleBack,
+      onMenu: () => _scaffoldKey.currentState?.openDrawer(),
     );
   }
 
@@ -289,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen>
               switchOutCurve: Curves.easeInOutQuint,
               duration: const Duration(milliseconds: 400),
               child: showAI
-                  ? const AiPage()
+                  ? const AiPageModular()
                   : _selectedIndex == 0
                       ? _buildDiscoverPage()
                       : _selectedIndex == 1
@@ -312,7 +239,10 @@ class _HomeScreenState extends State<HomeScreen>
             ? FloatingActionButton(
                 onPressed: _onButtonPressed,
                 backgroundColor: AppTheme.primaryColor,
-                child: const Icon(Icons.auto_awesome),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white,
+                ),
               )
             : null,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -379,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen>
                 : AppTheme.darkText.withOpacity(0.6),
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.explore_rounded),
+                icon: Icon(Icons.auto_awesome_mosaic),
                 label: 'Discover',
               ),
               BottomNavigationBarItem(
@@ -401,24 +331,24 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildDrawer({
-    required BuildContext context,
-    required int currentIndex,
-    required bool showAI,
-    required Function() onButtonPressed,
-    required void Function(void Function()) setState}) {
-    
+  Widget _buildDrawer(
+      {required BuildContext context,
+      required int currentIndex,
+      required bool showAI,
+      required Function() onButtonPressed,
+      required void Function(void Function()) setState}) {
     final authService = Provider.of<AuthService>(context);
     final user = authService.currentUser;
-    final String userInitial = user?.name != null && user!.name.isNotEmpty ? 
-                              user.name.substring(0, 1) : 'G';
-    
+    final String userInitial = user?.name != null && user!.name.isNotEmpty
+        ? user.name.substring(0, 1)
+        : 'G';
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppTheme.primaryColor,
             ),
             accountName: Text(
@@ -430,7 +360,7 @@ class _HomeScreenState extends State<HomeScreen>
               backgroundColor: Colors.white,
               child: Text(
                 userInitial,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   color: AppTheme.primaryColor,
                   fontWeight: FontWeight.bold,
@@ -438,7 +368,6 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ),
           ),
-          
           ListTile(
             leading: const Icon(Icons.explore_rounded),
             title: const Text('Discover'),
@@ -475,9 +404,7 @@ class _HomeScreenState extends State<HomeScreen>
               Navigator.pop(context);
             },
           ),
-          
           const Divider(),
-          
           ListTile(
             leading: const Icon(Icons.auto_awesome),
             title: const Text('AI Assistant'),
@@ -487,9 +414,7 @@ class _HomeScreenState extends State<HomeScreen>
               Navigator.pop(context);
             },
           ),
-          
           const Divider(),
-          
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),
@@ -498,7 +423,6 @@ class _HomeScreenState extends State<HomeScreen>
               // Navigate to settings
             },
           ),
-          
           ListTile(
             leading: const Icon(Icons.help_outline),
             title: const Text('Help & Support'),
@@ -507,9 +431,7 @@ class _HomeScreenState extends State<HomeScreen>
               // Navigate to help
             },
           ),
-          
           const Divider(),
-          
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),

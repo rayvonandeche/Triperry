@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:triperry/models/photo_response.dart';
 import 'package:triperry/models/video_item.dart';
 
 /// Main app state management provider
@@ -15,9 +14,9 @@ class AppProvider extends ChangeNotifier {
   String get currentLocation => _currentLocation;
 
   // Content state
-  List<PhotoResponse> _recentPhotos = [];
+  List _recentPhotos = [];
   List<VideoItem> _recentVideos = [];
-  List<PhotoResponse> get recentPhotos => _recentPhotos;
+  List  get recentPhotos => _recentPhotos;
   List<VideoItem> get recentVideos => _recentVideos;
 
   // Demo mode state (for testing without API calls)
@@ -55,7 +54,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Add photos to recent photos list
-  void addRecentPhotos(List<PhotoResponse> photos) {
+  void addRecentPhotos(List photos) {
     _recentPhotos = [...photos, ..._recentPhotos]
         .take(20) // Keep only the 20 most recent
         .toList();

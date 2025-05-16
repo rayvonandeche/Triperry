@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../components/detail_modal.dart';
+import '../../components/expandable_card.dart';
 
 class Trips extends StatelessWidget {
   const Trips({super.key});
@@ -193,7 +195,7 @@ class Trips extends StatelessWidget {
                             ),
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: () => _showTripEditModal(context, title),
                       ),
                       TextButton.icon(
                         icon: Icon(Icons.share, 
@@ -203,6 +205,14 @@ class Trips extends StatelessWidget {
                             color: Theme.of(context).colorScheme.secondary.withOpacity(0.9))),
                         onPressed: () {},
                       ),
+                      TextButton.icon(
+                        icon: Icon(Icons.view_day, 
+                          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.9)),
+                        label: Text('Details',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.tertiary.withOpacity(0.9))),
+                        onPressed: () => _showTripDetails(context, title, description),
+                      ),
                     ],
                   ),
                 ],
@@ -210,6 +220,147 @@ class Trips extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+  
+  // Example of using DetailModal to show trip edit form
+  void _showTripEditModal(BuildContext context, String tripTitle) {
+    DetailModal.show(
+      context: context,
+      title: 'Edit Trip: $tripTitle',
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            decoration: InputDecoration(
+              labelText: 'Trip Name',
+              hintText: tripTitle,
+              border: OutlineInputBorder(),
+            ),
+          ),
+          SizedBox(height: 16),
+          TextField(
+            decoration: InputDecoration(
+              labelText: 'Destination',
+              hintText: 'Where are you going?',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.location_on),
+            ),
+          ),
+          SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Start Date',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.calendar_today),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    labelText: 'End Date',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.calendar_today),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Trip updated successfully!')),
+            );
+          },
+          child: Text('Save Changes'),
+        ),
+      ],
+    );
+  }
+
+  // Example of using DetailModal to show trip details
+  void _showTripDetails(BuildContext context, String title, String description) {
+    DetailModal.show(
+      context: context,
+      title: title,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Trip Overview',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          SizedBox(height: 8),
+          Text(description),
+          SizedBox(height: 16),
+          
+          // Expandable itineraries using ExpandableCard
+          ExpandableCard(
+            title: 'Day 1 - Arrival',
+            subtitle: 'June 15, 2025',
+            leading: CircleAvatar(child: Text('1')),
+            expandedContent: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.flight_land),
+                  title: Text('Arrival at Airport'),
+                  subtitle: Text('10:30 AM - Kenya Airways KQ101'),
+                ),
+                ListTile(
+                  leading: Icon(Icons.hotel),
+                  title: Text('Check-in at Hotel'),
+                  subtitle: Text('12:30 PM - Grand Safari Hotel'),
+                ),
+                ListTile(
+                  leading: Icon(Icons.restaurant),
+                  title: Text('Welcome Lunch'),
+                  subtitle: Text('1:30 PM - Hotel Restaurant'),
+                ),
+              ],
+            ),
+          ),
+          
+          ExpandableCard(
+            title: 'Day 2 - Safari Tour',
+            subtitle: 'June 16, 2025',
+            leading: CircleAvatar(child: Text('2')),
+            expandedContent: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.wb_sunny),
+                  title: Text('Breakfast'),
+                  subtitle: Text('7:00 AM - Hotel Restaurant'),
+                ),
+                ListTile(
+                  leading: Icon(Icons.directions_car),
+                  title: Text('Depart for Safari'),
+                  subtitle: Text('8:30 AM - Masai Mara National Park'),
+                ),
+                ListTile(
+                  leading: Icon(Icons.photo_camera),
+                  title: Text('Wildlife Photography'),
+                  subtitle: Text('10:30 AM - Big Five Viewing'),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

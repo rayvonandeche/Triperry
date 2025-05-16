@@ -23,6 +23,7 @@ dependencies:
   provider: ^6.0.5
   shared_preferences: ^2.2.1
   cached_network_image: ^3.3.1
+  flutter_cache_manager: ^3.3.1
   shimmer: ^3.0.0
   intl: ^0.19.0
   flutter_animate: ^4.5.0
@@ -32,6 +33,7 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   flutter_chat_ui: ^1.6.8
   path: ^1.8.0
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:
@@ -42,6 +44,4 @@ flutter:
   uses-material-design: true
 
   assets:
-    - lib/assets/images/image.jpg
-    - lib/assets/animations/
-    - lib/assets/icons/
+    - assets/images/

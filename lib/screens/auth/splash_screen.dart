@@ -54,11 +54,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // A slight delay to show the splash screen
     await Future.delayed(const Duration(seconds: 1));
     
-    if (!mounted) return;
-
-    // Navigate based on auth state
+    if (!mounted) return;    // Navigate based on auth state
     if (authService.isLoggedIn) {
-      Navigator.of(context).pushReplacementNamed('/home');
+      Navigator.of(context).pushReplacementNamed('/ai');
     } else {
       Navigator.of(context).pushReplacementNamed('/login');
     }

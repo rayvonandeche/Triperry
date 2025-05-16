@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Primary colors
-  static const Color primaryColor = Color(0xFFFF8C00); // Dark orange
-  static const Color secondaryColor = Color(0xFFFFD700); // Gold yellow
+  static const Color primaryColor = Color.fromARGB(255, 104, 57, 0); // Dark orange
+  static const Color secondaryColor = Color.fromARGB(255, 180, 99, 0); // Gold yellow
   static const Color accentColor = Color(0xFFFFA500); // Orange
   
   // Background colors

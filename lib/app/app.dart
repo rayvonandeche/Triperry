@@ -1,6 +1,5 @@
 import 'package:triperry/app/home_screen.dart';
 import 'package:triperry/providers/app_provider.dart';
-import 'package:triperry/providers/media_cache_provider.dart';
 import 'package:triperry/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +17,6 @@ class App extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AppProvider()),
-        ChangeNotifierProvider(create: (_) => MediaCacheProvider()),
       ],
       child: Consumer<AppProvider>(builder: (context, appProvider, _) {
         // Set system UI overlay style based on the theme (including system theme)

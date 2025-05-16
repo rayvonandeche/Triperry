@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:triperry/services/auth_service.dart';
 import 'package:triperry/screens/auth/login_screen.dart';
 import 'package:triperry/screens/auth/signup_screen.dart';
-import 'package:triperry/screens/auth/splash_screen.dart';
-import 'package:triperry/providers/media_cache_provider.dart'; // Add this import
+import 'package:triperry/screens/splash/animated_splash_screen.dart';
+import 'package:triperry/screens/ai/ai_screen_modular.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +15,6 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
-        ChangeNotifierProvider(create: (_) => MediaCacheProvider()), // Add this provider
       ],
       child: const MyApp(),
     ),
@@ -33,12 +32,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppTheme.primaryColor),
         useMaterial3: true,
       ),
-      initialRoute: '/',
+      home: const AnimatedSplashScreen(nextScreen: HomeScreen()),
       routes: {
-        '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/home': (context) => const HomeScreen(),
+        '/ai': (context) => const AiPageModular(),
       },
     );
   }
