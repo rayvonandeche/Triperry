@@ -153,20 +153,9 @@ class _AiPageModularState extends State<AiPageModular>
     });
   }
 
-  void _showAttachmentSelector() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => AttachmentSelector(
-        onAttachmentsSelected: (attachments) {
-          setState(() {
-            _pendingAttachments.addAll(attachments);
-          });
-        },
-      ),
-    );
-  }  @override
-  Widget build(BuildContext context) {return Scaffold(
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Theme.of(context).brightness == Brightness.dark
           ? AppTheme.darkSurface
@@ -183,7 +172,8 @@ class _AiPageModularState extends State<AiPageModular>
           ),
         ],
         onBack: () => Navigator.of(context).pushReplacementNamed('/home'),
-      ),      body: Container(
+      ),
+      body: Container(
         // decoration: backgroundDecoration,
         color: Theme.of(context).brightness == Brightness.dark
             ? AppTheme.darkSurface
@@ -200,7 +190,7 @@ class _AiPageModularState extends State<AiPageModular>
                   ),
                 ),
               ],
-  
+
               // Main content - messages
               if (_hasUserInteracted)
                 Expanded(
@@ -208,17 +198,19 @@ class _AiPageModularState extends State<AiPageModular>
                     scrollController: _scrollController,
                     messages: _messages,
                     isTyping: _isTyping,
-                  ),                ),
+                  ),
+                ),
             ],
           ),
         ),
-      ),      bottomNavigationBar: Container(
+      ),
+      bottomNavigationBar: Container(
         color: Theme.of(context).brightness == Brightness.dark
             ? AppTheme.darkSurface
             : AppTheme.lightSurface,
         child: AiInputArea(
           textController: _textController,
-          onAddAttachment: _showAttachmentSelector,
+          onAddAttachment: () {}, // No longer needed, options are now embedded
           onSubmitted: _handleSubmitted,
           pendingAttachments: _pendingAttachments,
           onRemoveAttachment: (attachment) {

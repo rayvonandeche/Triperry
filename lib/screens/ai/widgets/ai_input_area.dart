@@ -25,11 +25,12 @@ class AiInputArea extends StatefulWidget {
   State<AiInputArea> createState() => _AiInputAreaState();
 }
 
-class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStateMixin {
+class _AiInputAreaState extends State<AiInputArea>
+    with SingleTickerProviderStateMixin {
   bool _isAttachmentOptionsVisible = false;
   late AnimationController _animationController;
   late Animation<double> _animation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -42,13 +43,13 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
       curve: Curves.easeInOut,
     );
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-  
+
   void _toggleAttachmentOptions() {
     setState(() {
       _isAttachmentOptionsVisible = !_isAttachmentOptionsVisible;
@@ -59,7 +60,7 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
       }
     });
   }
-  
+
   Future<void> _pickImage(ImageSource source) async {
     try {
       final picker = ImagePicker();
@@ -73,7 +74,7 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
           path: pickedFile.path,
           type: AttachmentType.image,
         );
-        
+
         setState(() {
           widget.pendingAttachments.add(attachment);
           _toggleAttachmentOptions(); // Hide the options after selection
@@ -96,16 +97,17 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
       type: AttachmentType.location,
       description: 'Current Location',
     );
-    
+
     setState(() {
       widget.pendingAttachments.add(attachment);
       _toggleAttachmentOptions(); // Hide the options after selection
     });
   }
-    @override
+
+  @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       margin: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 8),
       decoration: BoxDecoration(
@@ -130,7 +132,7 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildAttachmentPreviewSection(),
-          
+
           // Expandable attachment options section
           SizeTransition(
             sizeFactor: _animation,
@@ -139,7 +141,7 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
               child: _buildAttachmentOptions(),
             ),
           ),
-          
+
           Row(
             children: [
               _buildAddAttachmentButton(),
@@ -151,9 +153,10 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
       ),
     );
   }
+
   Widget _buildAttachmentPreviewSection() {
     if (widget.pendingAttachments.isEmpty) return const SizedBox.shrink();
-    
+
     return Container(
       height: 100,
       padding: const EdgeInsets.only(bottom: 8),
@@ -163,7 +166,7 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
       ),
     );
   }
-  
+
   Widget _buildAttachmentOptions() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -192,7 +195,7 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
       ),
     );
   }
-  
+
   Widget _buildAttachmentOption({
     required IconData icon,
     required String label,
@@ -232,6 +235,7 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
       ),
     );
   }
+
   Widget _buildAddAttachmentButton() {
     return Container(
       height: 50,
@@ -255,7 +259,7 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
   Widget _buildTextField(bool isDarkMode) {
     return Expanded(
       child: TextField(
-        controller: textController,
+        controller: widget.textController,
         decoration: InputDecoration(
           hintText: 'Ask about travel plans...',
           hintStyle: TextStyle(
@@ -263,14 +267,15 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
                 ? AppTheme.lightText.withOpacity(0.5)
                 : AppTheme.darkText.withOpacity(0.5),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           border: InputBorder.none,
           isDense: true,
         ),
         style: TextStyle(
           color: isDarkMode ? AppTheme.lightText : AppTheme.darkText,
         ),
-        onSubmitted: onSubmitted,
+        onSubmitted: widget.onSubmitted,
         minLines: 1,
         maxLines: 4,
       ),
@@ -301,9 +306,9 @@ class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStat
         ),
       ),
       child: IconButton(
-        icon: const Icon(Icons.arrow_upward_rounded, 
+        icon: const Icon(Icons.arrow_upward_rounded,
             color: Colors.white, size: 22),
-        onPressed: () => onSubmitted(textController.text),
+        onPressed: () => widget.onSubmitted(widget.textController.text),
         splashRadius: 22,
         tooltip: 'Send',
       ),
