@@ -10,13 +10,13 @@ class MiniAiAssistant extends StatefulWidget {
   final ChatMessage? lastResponse;
 
   const MiniAiAssistant({
-    Key? key,
+    super.key,
     required this.onSubmitted,
     required this.isTyping,
     required this.onClose,
     required this.onExpand,
     this.lastResponse,
-  }) : super(key: key);
+  });
 
   @override
   State<MiniAiAssistant> createState() => _MiniAiAssistantState();

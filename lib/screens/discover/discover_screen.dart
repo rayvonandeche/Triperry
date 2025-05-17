@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:triperry/theme/app_theme.dart';
 import 'package:triperry/screens/discover/pages/pages.dart';
-import 'pages/restaurant/restaurant.dart';
-import 'pages/accommodation/accommodation.dart';
-import 'pages/transport/transport.dart';
-import 'pages/activities/activities.dart';
-import 'pages/packages/packages.dart';
 
 class DiscoverPage extends StatefulWidget{
   final double toolbarHeight;

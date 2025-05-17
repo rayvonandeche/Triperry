@@ -3,11 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:triperry/theme/app_theme.dart';
 import 'package:triperry/widgets/triperry_app_bar.dart';
 import 'package:triperry/services/auth_service.dart';
-import 'package:triperry/screens/ai/widgets/attachment_selector.dart';
 import 'package:triperry/screens/ai/widgets/chat_messages_section.dart';
 import 'package:triperry/screens/ai/widgets/ai_input_area.dart';
 import 'package:triperry/screens/ai/widgets/ai_welcome_view.dart';
 import 'package:triperry/screens/ai/models/chat_message.dart';
+import 'package:triperry/services/gemini_service.dart' as gemini_rest;
+import 'package:triperry/services/api_keys.dart';
+import 'dart:async';
 
 class AiPageModular extends StatefulWidget {
   const AiPageModular({super.key});
@@ -27,7 +29,8 @@ class _AiPageModularState extends State<AiPageModular>
   bool _isTyping = false;
   bool _hasUserInteracted = false;
   final List<MessageAttachment> _pendingAttachments = [];
-
+  gemini_rest.GeminiService? _geminiService;
+  StreamSubscription<String>? _streamSubscription;
   @override
   void initState() {
     super.initState();
@@ -35,6 +38,9 @@ class _AiPageModularState extends State<AiPageModular>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     )..forward();
+
+    // Import API key from separate file for better security
+    _initializeGeminiService();
 
     // Add welcome message after a short delay
     Future.delayed(const Duration(milliseconds: 300), () {
@@ -45,12 +51,22 @@ class _AiPageModularState extends State<AiPageModular>
       }
     });
   }
+    void _initializeGeminiService() async {
+    try {
+      // Using the API key from the api_keys.dart file
+      _geminiService = gemini_rest.GeminiService(ApiKeys.geminiApiKey);
+      print('Gemini service initialized successfully');
+    } catch (e) {
+      print('Failed to initialize Gemini service: $e');
+    }
+  }
 
   @override
   void dispose() {
     _textController.dispose();
     _scrollController.dispose();
     _animationController.dispose();
+    _streamSubscription?.cancel();
     super.dispose();
   }
 
@@ -107,38 +123,96 @@ class _AiPageModularState extends State<AiPageModular>
       if (mounted) {
         _generateResponse(text);
       }
-    });
-  }
-
-  void _generateResponse(String text) {
-    final String lowercaseText = text.toLowerCase();
-    String response;
-
-    if (lowercaseText.contains('hello') || lowercaseText.contains('hi')) {
-      response =
-          "Hello, $_userName! How can I help with your travel plans today?";
-    } else if (lowercaseText.contains('safari') ||
-        lowercaseText.contains('wildlife')) {
-      response =
-          "Kenya offers incredible safaris! The Maasai Mara is known for the Great Migration, while Amboseli has stunning views of Mt. Kilimanjaro. What kind of safari experience interests you?";
-    } else if (lowercaseText.contains('beach') ||
-        lowercaseText.contains('coast')) {
-      response =
-          "Kenya's coast is beautiful! Diani Beach has white sands and clear waters, while Lamu offers a unique cultural experience with traditional Swahili architecture. Would you like recommendations for beach resorts?";
-    } else if (lowercaseText.contains('hotel') ||
-        lowercaseText.contains('stay')) {
-      response =
-          "I can help you find the perfect accommodation! Kenya offers everything from luxury safari lodges to beachfront resorts. What's your budget range and preferred location?";
-    } else if (lowercaseText.contains('food') ||
-        lowercaseText.contains('restaurant')) {
-      response =
-          "Kenyan cuisine is delicious! You can try nyama choma (grilled meat), ugali (cornmeal), and sukuma wiki (collard greens). Nairobi has excellent restaurants ranging from local spots to international cuisine.";
-    } else {
-      response =
-          "That's an interesting question about travel in Kenya! Would you like recommendations for specific destinations, activities, or travel tips?";
+    });  }  
+    void _generateResponse(String text) async {
+    // Verify the Gemini service is initialized
+    if (_geminiService == null) {
+      _initializeGeminiService();
+      // Show error message if still null
+      if (_geminiService == null) {
+        setState(() {
+          _messages.add(ChatMessage(
+            text: 'Sorry, the AI service is not available at the moment. Please try again later.',
+            isUser: false,
+            time: DateTime.now(),
+          ));
+          _isTyping = false;
+        });
+        return;
+      }
     }
 
-    _addMessage(response, false);
+    setState(() {
+      _isTyping = true;
+    });
+
+    // Add an empty AI message for streaming
+    setState(() {
+      _messages.add(ChatMessage(
+        text: '',
+        isUser: false,
+        time: DateTime.now(),
+      ));
+    });
+
+    // Cancel previous stream if any
+    await _streamSubscription?.cancel();
+    final aiMsgIndex = _messages.length - 1;
+    StringBuffer buffer = StringBuffer();
+      try {
+      print('Starting Gemini API stream for prompt: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
+      _streamSubscription = _geminiService!
+          .streamContent(prompt: text)
+          .listen(
+        (chunk) {
+          print('Received chunk: ${chunk.length} characters');
+          buffer.write(chunk);
+          setState(() {
+            _messages[aiMsgIndex] = _messages[aiMsgIndex].copyWith(text: buffer.toString());
+          });
+          _scrollToBottom();
+        },
+        onDone: () {
+          print('Stream completed successfully');
+          setState(() {
+            _isTyping = false;
+          });
+        },        onError: (e) {
+          print('Stream error: $e');
+          String errorMessage;
+          
+          // Handle different types of errors more gracefully
+          if (e.toString().contains('429')) {
+            errorMessage = 'Rate limit exceeded. Please try again in a few moments.';
+          } else if (e.toString().contains('403')) {
+            errorMessage = 'API key or authentication error. Please check your API key configuration.';
+          } else if (e.toString().contains('timeout') || e.toString().contains('timed out')) {
+            errorMessage = 'The request timed out. Please check your internet connection and try again.';
+          } else {
+            errorMessage = 'Sorry, I encountered an error while generating a response. Please try again.';
+          }
+          
+          setState(() {
+            _messages[aiMsgIndex] = _messages[aiMsgIndex].copyWith(
+              text: buffer.toString().isNotEmpty 
+                  ? buffer.toString() 
+                  : errorMessage
+            );
+            _isTyping = false;
+          });
+          _scrollToBottom();
+        },
+      );
+    } catch (e) {
+      print('Exception creating stream: $e');
+      setState(() {
+        _messages[aiMsgIndex] = _messages[aiMsgIndex].copyWith(
+          text: 'Sorry, I encountered an error while generating a response. Please try again.'
+        );
+        _isTyping = false;
+      });
+      _scrollToBottom();
+    }
   }
 
   void _scrollToBottom() {

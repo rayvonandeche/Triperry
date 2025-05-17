@@ -34,4 +34,18 @@ class ChatMessage {
   });
   
   bool get hasAttachments => attachments != null && attachments!.isNotEmpty;
+
+  ChatMessage copyWith({
+    String? text,
+    bool? isUser,
+    DateTime? time,
+    List<MessageAttachment>? attachments,
+  }) {
+    return ChatMessage(
+      text: text ?? this.text,
+      isUser: isUser ?? this.isUser,
+      time: time ?? this.time,
+      attachments: attachments ?? this.attachments,
+    );
+  }
 }

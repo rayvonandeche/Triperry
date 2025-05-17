@@ -20,7 +20,7 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
   bool _obscureConfirmPassword = true;
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  final int _totalPages = 3;
+  final int _totalPages = 2; // Reduced from 3 to 2 pages
   
   // Travel preferences
   String _travelStyle = 'Adventure';
@@ -30,6 +30,11 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
   String _dietaryRestrictions = 'None';
   String _accommodationPreference = 'Mid-range hotels';
   int _travelers = 2;
+  
+  // Payment information (added)
+  String _paymentMethod = 'Credit Card';
+  final List<String> _paymentMethods = ['Credit Card', 'Debit Card', 'PayPal', 'Mobile Money', 'Apple Pay', 'Google Pay'];
+  bool _hasAcceptedTerms = true;
   
   // Lists for dropdowns
   final List<String> _travelStyles = ['Adventure', 'Relaxation', 'Cultural', 'Luxury', 'Budget', 'Family'];
@@ -115,6 +120,7 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
       'dietaryRestrictions': _dietaryRestrictions,
       'accommodationPreference': _accommodationPreference,
       'travelers': _travelers,
+      'paymentMethod': _paymentMethod, // Added payment method
     };
 
     final authService = Provider.of<AuthService>(context, listen: false);
@@ -159,7 +165,6 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                       children: [
                         _buildBasicInfoPage(),
                         _buildTravelPreferencesPage(),
-                        _buildFinalPreferencesPage(),
                       ],
                     ),
                   ),
@@ -257,8 +262,6 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
         return 'Basic Information';
       case 1:
         return 'Travel Preferences';
-      case 2:
-        return 'Additional Preferences';
       default:
         return '';
     }
@@ -497,108 +500,19 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
               },
               icon: Icons.calendar_today_outlined,
             ),
-            const SizedBox(height: 32),
-            
-            // Next button
-            ElevatedButton(
-              onPressed: _nextPage,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Next',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
             const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFinalPreferencesPage() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Dietary restrictions dropdown
+            
+            // Payment method dropdown (added)
             _buildDropdownField(
-              label: 'Dietary Restrictions',
-              value: _dietaryRestrictions,
-              items: _dietaryOptions,
+              label: 'Payment Method',
+              value: _paymentMethod,
+              items: _paymentMethods,
               onChanged: (value) {
                 setState(() {
-                  _dietaryRestrictions = value!;
+                  _paymentMethod = value!;
                 });
               },
-              icon: Icons.restaurant_outlined,
-            ),
-            const SizedBox(height: 20),
-            
-            // Accommodation preference dropdown
-            _buildDropdownField(
-              label: 'Accommodation Preference',
-              value: _accommodationPreference,
-              items: _accommodationPreferences,
-              onChanged: (value) {
-                setState(() {
-                  _accommodationPreference = value!;
-                });
-              },
-              icon: Icons.hotel_outlined,
-            ),
-            const SizedBox(height: 20),
-            
-            // Number of travelers slider
-            Text(
-              'Number of Travelers',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.darkText.withOpacity(0.8),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.people_outline, color: Colors.grey),
-                Expanded(
-                  child: Slider(
-                    value: _travelers.toDouble(),
-                    min: 1,
-                    max: 10,
-                    divisions: 9,
-                    label: '$_travelers',
-                    activeColor: AppTheme.primaryColor,
-                    onChanged: (value) {
-                      setState(() {
-                        _travelers = value.toInt();
-                      });
-                    },
-                  ),
-                ),
-                Container(
-                  width: 40,
-                  alignment: Alignment.center,
-                  child: Text(
-                    '$_travelers',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
+              icon: Icons.payment_outlined,
             ),
             const SizedBox(height: 32),
             
@@ -606,10 +520,12 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
             Row(
               children: [
                 Checkbox(
-                  value: true,
+                  value: _hasAcceptedTerms,
                   activeColor: AppTheme.primaryColor,
                   onChanged: (value) {
-                    // In a real app, update a state variable
+                    setState(() {
+                      _hasAcceptedTerms = value!;
+                    });
                   },
                 ),
                 Expanded(

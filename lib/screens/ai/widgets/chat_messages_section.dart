@@ -9,17 +9,17 @@ class ChatMessagesSection extends StatelessWidget {
   final bool isTyping;
   
   const ChatMessagesSection({
-    Key? key,
+    super.key,
     required this.scrollController,
     required this.messages,
     required this.isTyping,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       controller: scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       itemCount: messages.length + (isTyping ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == messages.length) {

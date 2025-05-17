@@ -1,3 +1,4 @@
+import 'package:google_fonts/google_fonts.dart';
 import 'package:triperry/app/home_screen.dart';
 import 'package:triperry/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -5,12 +6,13 @@ import 'package:provider/provider.dart';
 import 'package:triperry/services/auth_service.dart';
 import 'package:triperry/screens/auth/login_screen.dart';
 import 'package:triperry/screens/auth/signup_screen.dart';
+// Using optimized signup screen that focuses on essential information
 import 'package:triperry/screens/splash/animated_splash_screen.dart';
 import 'package:triperry/screens/ai/ai_screen_modular.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   runApp(
     MultiProvider(
       providers: [
@@ -31,6 +33,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: AppTheme.primaryColor),
         useMaterial3: true,
+      ).copyWith(
+        textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
       ),
       home: const AnimatedSplashScreen(nextScreen: HomeScreen()),
       routes: {

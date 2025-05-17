@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import '../../../theme/app_theme.dart';
 import 'attachment_preview.dart';
 import '../models/chat_message.dart';
