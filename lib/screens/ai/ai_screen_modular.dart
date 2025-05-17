@@ -165,17 +165,12 @@ class _AiPageModularState extends State<AiPageModular>
         },
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor =
-        isDark ? AppTheme.darkBackground : const Color(0xFFF9F6F0);
-
-    return Scaffold(
-      backgroundColor: backgroundColor,
+  }  @override
+  Widget build(BuildContext context) {return Scaffold(
       extendBodyBehindAppBar: true,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppTheme.darkSurface
+          : AppTheme.lightSurface,
       appBar: TriperryAppBar(
         title: 'Triperry AI',
         showAI: true,
@@ -188,55 +183,50 @@ class _AiPageModularState extends State<AiPageModular>
           ),
         ],
         onBack: () => Navigator.of(context).pushReplacementNamed('/home'),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Show greeting and suggestions until user interacts
-            if (!_hasUserInteracted) ...[
-              Expanded(
-                child: AiWelcomeView(
-                  userName: _userName,
-                  onSuggestionTap: _handleSubmitted,
-                ),
-              ),
-            ],
-
-            // Main content - messages
-            if (_hasUserInteracted)
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppTheme.primaryColor.withOpacity(0.08),
-                        const Color(0xFFDEB887).withOpacity(0.05),
-                        AppTheme.secondaryColor.withOpacity(0.03),
-                      ],
-                    ),
+      ),      body: Container(
+        // decoration: backgroundDecoration,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppTheme.darkSurface
+            : AppTheme.lightSurface,
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Show greeting and suggestions until user interacts
+              if (!_hasUserInteracted) ...[
+                Expanded(
+                  child: AiWelcomeView(
+                    userName: _userName,
+                    onSuggestionTap: _handleSubmitted,
                   ),
+                ),
+              ],
+  
+              // Main content - messages
+              if (_hasUserInteracted)
+                Expanded(
                   child: ChatMessagesSection(
                     scrollController: _scrollController,
                     messages: _messages,
                     isTyping: _isTyping,
-                  ),
-                ),
-              ),
-          ],
+                  ),                ),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: AiInputArea(
-        textController: _textController,
-        onAddAttachment: _showAttachmentSelector,
-        onSubmitted: _handleSubmitted,
-        pendingAttachments: _pendingAttachments,
-        onRemoveAttachment: (attachment) {
-          setState(() {
-            _pendingAttachments.remove(attachment);
-          });
-        },
+      ),      bottomNavigationBar: Container(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppTheme.darkSurface
+            : AppTheme.lightSurface,
+        child: AiInputArea(
+          textController: _textController,
+          onAddAttachment: _showAttachmentSelector,
+          onSubmitted: _handleSubmitted,
+          pendingAttachments: _pendingAttachments,
+          onRemoveAttachment: (attachment) {
+            setState(() {
+              _pendingAttachments.remove(attachment);
+            });
+          },
+        ),
       ),
     );
   }

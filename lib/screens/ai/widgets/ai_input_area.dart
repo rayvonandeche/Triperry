@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../../theme/app_theme.dart';
 import 'attachment_preview.dart';
 import '../models/chat_message.dart';
 
-class AiInputArea extends StatelessWidget {
+class AiInputArea extends StatefulWidget {
   final TextEditingController textController;
   final VoidCallback onAddAttachment;
   final void Function(String) onSubmitted;
@@ -11,23 +13,103 @@ class AiInputArea extends StatelessWidget {
   final void Function(MessageAttachment) onRemoveAttachment;
 
   const AiInputArea({
-    Key? key,
+    super.key,
     required this.textController,
     required this.onAddAttachment,
     required this.onSubmitted,
     required this.pendingAttachments,
     required this.onRemoveAttachment,
-  }) : super(key: key);
+  });
 
   @override
-  Widget build(BuildContext context) {
-    final scaffoldBg = Theme.of(context).scaffoldBackgroundColor;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+  State<AiInputArea> createState() => _AiInputAreaState();
+}
 
+class _AiInputAreaState extends State<AiInputArea> with SingleTickerProviderStateMixin {
+  bool _isAttachmentOptionsVisible = false;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+  
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+  }
+  
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+  
+  void _toggleAttachmentOptions() {
+    setState(() {
+      _isAttachmentOptionsVisible = !_isAttachmentOptionsVisible;
+      if (_isAttachmentOptionsVisible) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
+  }
+  
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+
+      if (pickedFile != null && mounted) {
+        final attachment = MessageAttachment(
+          path: pickedFile.path,
+          type: AttachmentType.image,
+        );
+        
+        setState(() {
+          widget.pendingAttachments.add(attachment);
+          _toggleAttachmentOptions(); // Hide the options after selection
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
+  }
+
+  void _shareLocation() {
+    // This would normally call a location plugin
+    // For this prototype, we'll just use a dummy location
+    final attachment = MessageAttachment(
+      path: 'assets/map_thumbnail.png',
+      type: AttachmentType.location,
+      description: 'Current Location',
+    );
+    
+    setState(() {
+      widget.pendingAttachments.add(attachment);
+      _toggleAttachmentOptions(); // Hide the options after selection
+    });
+  }
+    @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
-      margin: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 12),
+      margin: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 8),
       decoration: BoxDecoration(
-        color: scaffoldBg.withOpacity(0.85),
+        color: isDarkMode ? AppTheme.darkSurface : AppTheme.lightSurface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: isDarkMode
@@ -48,6 +130,16 @@ class AiInputArea extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildAttachmentPreviewSection(),
+          
+          // Expandable attachment options section
+          SizeTransition(
+            sizeFactor: _animation,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _buildAttachmentOptions(),
+            ),
+          ),
+          
           Row(
             children: [
               _buildAddAttachmentButton(),
@@ -59,20 +151,87 @@ class AiInputArea extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildAttachmentPreviewSection() {
-    if (pendingAttachments.isEmpty) return const SizedBox.shrink();
+    if (widget.pendingAttachments.isEmpty) return const SizedBox.shrink();
     
     return Container(
       height: 100,
       padding: const EdgeInsets.only(bottom: 8),
       child: AttachmentPreview(
-        attachments: pendingAttachments,
-        onRemove: onRemoveAttachment,
+        attachments: widget.pendingAttachments,
+        onRemove: widget.onRemoveAttachment,
       ),
     );
   }
-
+  
+  Widget _buildAttachmentOptions() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildAttachmentOption(
+            icon: Icons.photo,
+            label: 'Photos',
+            color: Colors.purple,
+            onTap: () => _pickImage(ImageSource.gallery),
+          ),
+          _buildAttachmentOption(
+            icon: Icons.camera_alt,
+            label: 'Camera',
+            color: AppTheme.primaryColor,
+            onTap: () => _pickImage(ImageSource.camera),
+          ),
+          _buildAttachmentOption(
+            icon: Icons.location_on,
+            label: 'Location',
+            color: Colors.green,
+            onTap: _shareLocation,
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildAttachmentOption({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: color.withOpacity(0.3), width: 1),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white70
+                  : Colors.grey[800],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   Widget _buildAddAttachmentButton() {
     return Container(
       height: 50,
@@ -81,10 +240,14 @@ class AiInputArea extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: IconButton(
-        icon: Icon(Icons.add, 
-            color: AppTheme.primaryColor.withOpacity(0.7), size: 26),
-        onPressed: onAddAttachment,
-        tooltip: 'Add attachment',
+        icon: AnimatedIcon(
+          icon: AnimatedIcons.menu_close,
+          progress: _animation,
+          color: AppTheme.primaryColor.withOpacity(0.7),
+          size: 26,
+        ),
+        onPressed: _toggleAttachmentOptions,
+        tooltip: 'Attachments',
       ),
     );
   }

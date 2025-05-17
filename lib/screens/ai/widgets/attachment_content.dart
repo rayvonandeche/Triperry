@@ -6,9 +6,9 @@ class AttachmentContent extends StatelessWidget {
   final List<MessageAttachment> attachments;
   
   const AttachmentContent({
-    Key? key,
+    super.key,
     required this.attachments,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class AttachmentContent extends StatelessWidget {
     switch (attachment.type) {
       case AttachmentType.image:
         return ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           child: Image.file(
             File(attachment.path),
             width: 200,

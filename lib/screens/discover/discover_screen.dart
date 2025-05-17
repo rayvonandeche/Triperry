@@ -81,6 +81,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           
           // Category selection (horizontal scrollable list)
           Container(
+            color: Colors.transparent,
             height: 60,
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: ListView.builder(
@@ -96,8 +97,14 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     color: isSelected ? 
                       AppTheme.primaryColor : 
                       (Theme.of(context).brightness == Brightness.dark ? 
-                        Colors.grey[800] : Colors.grey[200]),
+                        Colors.grey[800] : Theme.of(context).scaffoldBackgroundColor),
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? AppTheme.primaryColor : 
+                        (Theme.of(context).brightness == Brightness.dark ? 
+                          Colors.grey[800]! : Colors.grey[300]!),
+                      width: 1,
+                    ),
                     boxShadow: isSelected ? [
                       BoxShadow(
                         color: AppTheme.primaryColor.withOpacity(0.3),
